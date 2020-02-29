@@ -1,0 +1,7 @@
+#This file should contain all accepted commands by the database driver
+#These commands should be specified using ONLY uppercase character
+#All lines starting with '#' or ' '(space) are ignored by the python interpretor
+# 1. Tables specific commands
+CREATE
+UPDATE
+DELETE
