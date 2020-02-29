@@ -11,3 +11,10 @@
 // general usage
 #define MAX_STREAM_LENGTH 102400
 #define MIN_STREAM_LENGTH 1024
+#define DATE_LENGTH 10
+
+// log level accepted
+#define INFO "INFO"
+#define DEBUG "DEBUG"
+#define WARN "WARN" //(a.k.a WARNING)
+#define ERROR "ERROR"

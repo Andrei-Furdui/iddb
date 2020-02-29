@@ -55,6 +55,7 @@ char * get_all_files_from_dir(char *dir) {
 }
 
 
+
 // TODO - remove this, only for test
 int main(void) 
 { 

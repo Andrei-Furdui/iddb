@@ -7,32 +7,45 @@ sys.path.insert(0, "../../logger/python_logger/")
 from python_logger import PythonLogger
 
 class UserPrompt:
-    def __init__(self, cli_version, dbi_version):
-        self.cli_version = cli_version
-        self.dbi_version = dbi_version
-        self.running_prompt = True
+	def __init__(self, cli_version, dbi_version):
+		self.cli_version = cli_version
+		self.dbi_version = dbi_version
+		self.running_prompt = True
     
-    def prompt_message(self):
-	# add info into system.log file
-	logger = PythonLogger("INFO")
-	logger.write_log("User tries to connect to the database...")
+	def prompt_message(self):
+		# add info into system.log file
+		logger = PythonLogger("INFO")
+		logger.write_log("User tries to connect to the database...")
 
-        init_message = "Welcome to iDDB, version " + self.dbi_version
-        cli_version = "CLI Version: " + self.cli_version
-        final_welcome_message = init_message + "\n" + cli_version
-        return final_welcome_message
+		init_message = "Welcome to iDDB, version " + self.dbi_version
+		cli_version = "CLI Version: " + self.cli_version
+		temp_solution = "\nTemporary solution: each command must be specified using ONLY one line, this will be improved in the future\n"
+		final_welcome_message = init_message + "\n" + cli_version + temp_solution
+		return final_welcome_message
 
-    # this is the main method - entry point on the app (cli)
-    def create_prompt(self):
-        while self.running_prompt:
-            user_value = raw_input('iDDB> ')
-            if user_value == "end" or user_value == "bye" or user_value == "exit":
-                print ("\n\nBye, have a nice day!")
-                self.running_prompt = False
-            else:
-                print (user_value)
-
-
+    	# this is the main method - entry point on the app (cli)
+    	def create_prompt(self):
+		while self.running_prompt:
+		    	user_value = raw_input('iDDB> ')
+			if self.end_of_command(user_value):
+				print ("To be executed...")
+		    	if user_value == "end" or user_value == "bye" or user_value == "exit":
+		        	print ("\n\nBye, have a nice day!")
+		        	self.running_prompt = False
+		    	else:
+		        	print (user_value)
+	
+	# An user command must have on the last position(s):
+	# 1. ;
+	#    OR
+	# 2. \g
+	def end_of_command(self, command):
+		"""Returns True is the user wants to execute its command,
+		 False otherwise"""
+		
+		if ";" in command or "\g" in command:
+			return True
+		return False
 
 
 class AvailableCommands:
