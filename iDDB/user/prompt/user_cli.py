@@ -2,6 +2,9 @@
 # It contains and decodes all user actions
 # It is the entry point to the db
 
+import sys
+sys.path.insert(0, "../../logger/python_logger/")
+from python_logger import PythonLogger
 
 class UserPrompt:
     def __init__(self, cli_version, dbi_version):
@@ -10,6 +13,10 @@ class UserPrompt:
         self.running_prompt = True
     
     def prompt_message(self):
+	# add info into system.log file
+	logger = PythonLogger("INFO")
+	logger.write_log("User tries to connect to the database...")
+
         init_message = "Welcome to iDDB, version " + self.dbi_version
         cli_version = "CLI Version: " + self.cli_version
         final_welcome_message = init_message + "\n" + cli_version
@@ -54,16 +61,16 @@ class AvailableCommands:
 			
         
 if __name__ == "__main__":
-    #k = UserPrompt("1.0", "0.1")
-    #prompt_info = k.prompt_message()
-    #print (prompt_info)
-    #k.create_prompt()
+    k = UserPrompt("1.0", "0.1")
+    prompt_info = k.prompt_message()
+    print (prompt_info)
+    k.create_prompt()
 	
-	test = AvailableCommands("available_commands.txt")
-	p = []
-	p = test.parse_commands()
-	for i in p:
-		print (i)
+	#test = AvailableCommands("available_commands.txt")
+	#p = []
+	#p = test.parse_commands()
+	#for i in p:
+	#	print (i)
 
 
 
