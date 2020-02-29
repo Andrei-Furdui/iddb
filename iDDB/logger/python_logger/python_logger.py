@@ -10,6 +10,7 @@ class PythonLogger:
 		else:
 			self.system_file_log = "iDDB_init.log"
 
+		# TODO - modify this path when available
 		self.system_log_path = "/home/doublea/var/log/iDDB/"	
 		self.log_file = self.system_log_path + self.system_file_log	
 
