@@ -36,6 +36,8 @@ int check_dir_exists (char *dir, int database_call) {
 			strcat(log_info, " but it doesn't exist...");
 			write_log(INFO, log_info);
 		}
+		closedir(dr); 
+		free(log_info);
 		return TRUE;	
     	} 
 	
@@ -54,6 +56,7 @@ int check_dir_exists (char *dir, int database_call) {
 	return FALSE;
 }
 
+// Returns the $HOME path for a user
 char * home_path() {
 	const char *homedir;
 	if ((homedir = getenv("HOME")) == NULL) {
@@ -67,10 +70,11 @@ char * home_path() {
 /*
 void main() {
 	//printf("%d\n", check_null_argument(""));
-	//printf ("HERE - %d\n", check_dir_exists("/home/doublea/ana1", 1));
+	printf ("HERE - %d\n", check_dir_exists("/home/doublea/ana", 1));
 	printf("HERE - %s\n", home_path());
 }
 */
+
 
 
 

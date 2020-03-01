@@ -47,13 +47,13 @@ int create_database (char *db_name) {
 
 	// TODO - make this debug
 	write_log(INFO, log_info);
-
+	free (log_info);
 	return result == 0 ? TRUE:FALSE;
 	//return mkdir(database_path, 0774) == 0 ? TRUE:FALSE;	
 }
 
 /*
 void main() {
-	printf("HERE- %d\n", create_database("test3"));
+	printf("HERE- %d\n", create_database("test34"));
 }
 */
