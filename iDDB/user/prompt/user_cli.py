@@ -6,6 +6,11 @@ import sys
 sys.path.insert(0, "../../logger/python_logger/")
 from python_logger import PythonLogger
 
+sys.path.insert(0, "../../db_core/python_work/table_work/")
+from database_manipulation import DatabaseUtility
+
+# TODO TO CONTINUE WITH - to list all available databases (see ../../db_core/python_work/table_work/database_manipulation.py)
+
 class UserPrompt:
 	def __init__(self, cli_version, dbi_version):
 		self.cli_version = cli_version
@@ -15,7 +20,7 @@ class UserPrompt:
 	def prompt_message(self):
 		# add info into system.log file
 		logger = PythonLogger("INFO")
-		logger.write_log("User tries to connect to the database...")
+		logger.write_log("User tries to connect to the database (CLI - entry point)...")
 
 		init_message = "Welcome to iDDB, version " + self.dbi_version
 		cli_version = "CLI Version: " + self.cli_version
