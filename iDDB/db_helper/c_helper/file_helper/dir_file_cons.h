@@ -18,3 +18,7 @@
 #define DEBUG "DEBUG"
 #define WARN "WARN" //(a.k.a WARNING)
 #define ERROR "ERROR"
+
+// the path starting from the $HOME dir
+#define DB_PATH "var/iDDB/database/"
+
