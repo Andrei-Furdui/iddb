@@ -56,7 +56,7 @@ int check_dir_exists (char *dir, int database_call) {
 	return FALSE;
 }
 
-// Returns the $HOME path for a user
+// Returns the $HOME path for the current user
 char * home_path() {
 	const char *homedir;
 	if ((homedir = getenv("HOME")) == NULL) {
