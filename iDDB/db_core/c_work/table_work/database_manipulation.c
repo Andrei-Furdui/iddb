@@ -18,12 +18,10 @@ int create_database (char *db_name) {
 
 	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
 
-	// FIXME - deallocate memory for this variables
 	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
 	strcpy(database_path, home_path());
 	strcat(database_path, DB_PATH);
 	strcat(database_path, db_name);
-	printf("TEST %s\n", database_path);
 	
 	// most likely this is the case when the FALSE value
 	// is returned, so no difference between invalid parameter or
@@ -48,12 +46,51 @@ int create_database (char *db_name) {
 	// TODO - make this debug
 	write_log(INFO, log_info);
 	free (log_info);
+	free (database_path);
 	return result == 0 ? TRUE:FALSE;
 	//return mkdir(database_path, 0774) == 0 ? TRUE:FALSE;	
 }
 
-/*
-void main() {
-	printf("HERE- %d\n", create_database("test34"));
+// Deletes an EMPTY database
+// Returns 1 is the database was successfully removed
+// 0 otherwise (e.g. it's not empty or doesn't exist)
+int delete_empty_database (char *db_name) {
+	// make sure the database name is fine
+	if (!check_null_argument(db_name)) {
+		return FALSE;
+	}
+	
+	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	strcpy(database_path, home_path());
+	strcat(database_path, DB_PATH);
+	strcat(database_path, db_name);
+
+	// the database doesn't exist
+	if (check_dir_exists(database_path, 1)) {
+		return FALSE;
+	}
+	
+	int result = rmdir(database_path);
+	strcpy(log_info, "An user's trying to remove an empty database: ");
+	strcat(log_info, db_name);
+	strcat(log_info, ", result: ");
+	
+	if (!result) {
+		strcat(log_info, "TRUE");
+	}
+	else {
+		strcat(log_info, "FALSE (probably it's not empty)");
+	}
+	// TODO - make this debug
+	write_log(INFO, log_info);
+	free (log_info);
+	free (database_path);
+	return result == 0 ? TRUE:FALSE;
+
 }
-*/
+
+void main() {
+	printf("HERE- %d\n", create_database("test"));
+}
+
