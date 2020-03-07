@@ -1,6 +1,6 @@
 from ctypes import *
 
-so_file = './test.so'
+so_file = './database_manipulation.so'
 cfactorial = CDLL(so_file)
 
 

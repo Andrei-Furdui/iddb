@@ -1,7 +1,14 @@
 #This file should contain all accepted commands by the database driver
 #These commands should be specified using ONLY uppercase character
 #All lines starting with '#' or ' '(space) are ignored by the python interpretor
-# 1. Tables specific commands
-CREATE
-UPDATE
-DELETE
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#BE CAREFULL, THIS FILE SHOULD NOT CONTAIN AN EMPTY LINE AT THE BOTTOM
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 1. Table specific commands
+CREATE TABLE
+UPDATE TABLE
+DELETE TABLE
+# 2. Database specific commands
+LS DATABASE
+MKDIR DATABASE
+RMDIR DATABASE

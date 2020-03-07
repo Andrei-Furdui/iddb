@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-//#include <stdio.h>
+#include <stdio.h>
 #include "../../../db_helper/c_helper/file_helper/dir_file_cons.h"
 #include "../../../db_helper/c_helper/file_helper/dir_file_helper.c"
 // already included
@@ -12,7 +12,7 @@
 // 0 otherwise (e.g. it already exists)
 int create_database (char *db_name) {
 	// make sure the database name is fine
-	if (!check_null_argument(db_name)) {
+	if (!check_null_argument(db_name) || !strlen(db_name)) {
 		return FALSE;
 	}
 
@@ -51,8 +51,16 @@ int create_database (char *db_name) {
 	//return mkdir(database_path, 0774) == 0 ? TRUE:FALSE;	
 }
 
+// Deletes a non-empty database
+// Non returned type since it creates a new process
+// responsable with this operation
+// FIXME - doesn't work for now
+int delete_non_empty_database (char *db_name) {
+	execlp("rmdir -r", db_name, NULL);
+}
+
 // Deletes an EMPTY database
-// Returns 1 is the database was successfully removed
+// Returns 1 if the database was successfully removed
 // 0 otherwise (e.g. it's not empty or doesn't exist)
 int delete_empty_database (char *db_name) {
 	// make sure the database name is fine
@@ -81,6 +89,9 @@ int delete_empty_database (char *db_name) {
 	}
 	else {
 		strcat(log_info, "FALSE (probably it's not empty)");
+		// FIXME - doesn't work for now
+		strcat(log_info, "- trying to go further with the removing operation...");
+		delete_non_empty_database (database_path);
 	}
 	// TODO - make this debug
 	write_log(INFO, log_info);
@@ -90,7 +101,10 @@ int delete_empty_database (char *db_name) {
 
 }
 
+/*
 void main() {
-	printf("HERE- %d\n", create_database("test"));
-}
+	printf("HERE- %d\n", delete_empty_database("qwe"));
+}*/
+
+
 

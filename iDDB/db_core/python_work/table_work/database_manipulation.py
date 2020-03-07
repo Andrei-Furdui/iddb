@@ -7,6 +7,7 @@ class DatabaseUtility:
 
 	def get_all_databases(self):
 		"""Returns all existing databases"""
+
 		folders = list(filter(lambda x: os.path.isdir \
 				(os.path.join(self.database_path, x)), \
 				os.listdir(self.database_path)))
@@ -14,6 +15,8 @@ class DatabaseUtility:
 			return "There are no databases yet"
 		else:
 			return folders
+	
+	
 	
 	
 		
