@@ -102,9 +102,6 @@ class UserPrompt:
 		db_utility = DatabaseUtility()	
 		# TODO - create a python dictionary for all commands below
 		if database_command:
-			so_file = '../../out/so_files/database_manipulation.so'
-			c_db = CDLL(so_file)
-			
 			# 1. display all existing DBs
 			if "LS".lower() in actual_user_command.lower():
 				# let's parse the list received
@@ -116,7 +113,10 @@ class UserPrompt:
 					for iterator in temp_list:
 						print("Database name: " + iterator)
 					print ("\n")
-	
+			
+			so_file = '../../out/so_files/database_manipulation.so'
+			c_db = CDLL(so_file)
+
 			# 2. create a new database (an empty one)
 			if "MKDIR".lower() in actual_user_command.lower():
 				db_name = self.find_between(actual_user_command, \
