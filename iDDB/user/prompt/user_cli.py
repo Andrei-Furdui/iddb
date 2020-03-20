@@ -95,6 +95,10 @@ class UserPrompt:
 			# is satisfied
 			return
 		
+		# this variable represents the current database - the one which
+		# the user wants to do his job
+		current_database = None
+		
 		# in this moment we now for sure what's the purpose of
 		# every command
 		
@@ -146,7 +150,38 @@ class UserPrompt:
 				if c_return != 1:
 					print ("Database deletion has failed, check log file for details. Status (-1).")
 					return
-				
+			
+			if "USE".lower() in actual_user_command.lower():
+				db_name = self.find_between(actual_user_command, \
+								"database ", ";")
+				# even if the C driver doesn't allow an empty db name
+				# make sure it doesn't reach that point if so
+				if db_name is None:
+					print ("Invalid command. Status (-1).\n")
+					return
+
+				temp_list = db_utility.get_all_databases()
+				if isinstance(temp_list, six.string_types):
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user tried to use a database, but there are no any. Exiting!")
+					print (temp_list)
+					print ("You must create a database first. Status (-1).")
+					return
+				else:
+					for iterator in temp_list:
+						if iterator == db_name:
+							current_database = db_name
+							break
+						# make sure no database is set-up when the 
+						# specified one doesn't exist
+						current_database = None
+					if current_database is None:
+						logger = PythonLogger("ERROR")
+						logger.write_log("The user wants to use the database: " + str(db_name) + " but it doesn't exist...")
+						print ("The specified database does not exist. Status (-1).")
+						return
+					logger = PythonLogger("DEBUG")
+					logger.write_log("Current database is: " + str(current_database) + " ...")
 			
 		print ("Command successfully executed. Status (0).\n")
 	
