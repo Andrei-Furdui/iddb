@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <dirent.h> 
+#include <fcntl.h>
+#include <errno.h>
 //#include<stdio.h>
 #include "dir_file_cons.h"
 #include "../../../logger/c_logger/c_logger.c"
@@ -53,6 +55,19 @@ int check_dir_exists (char *dir, int database_call) {
 	}
 	closedir(dr); 
 	free(log_info);
+	return FALSE;
+}
+
+// Returns True if the specified file exists, false otherwise
+int check_file_exists (char *file) {
+	int fd = open(file, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
+	if (fd < 0) {
+	  	if (errno == EEXIST) {
+			close (fd);
+	    		return TRUE;
+	  	}
+	}
+	close (fd);
 	return FALSE;
 }
 

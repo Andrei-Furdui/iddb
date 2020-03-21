@@ -27,6 +27,8 @@ int create_database (char *db_name) {
 	// is returned, so no difference between invalid parameter or
 	// db exists
 	if (!check_dir_exists(database_path, 1)) {
+		free (log_info);
+		free (database_path);
 		return FALSE;
 	}
 
@@ -76,6 +78,8 @@ int delete_empty_database (char *db_name) {
 
 	// the database doesn't exist
 	if (check_dir_exists(database_path, 1)) {
+		free (log_info);
+		free (database_path);
 		return FALSE;
 	}
 	

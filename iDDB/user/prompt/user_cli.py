@@ -31,16 +31,24 @@ class UserPrompt:
 		init_message = "Welcome to iDDB, version " + self.dbi_version
 		cli_version = "CLI Version: " + self.cli_version
 		temp_solution = "\nTemporary solution: each command must be specified using ONLY one line, this will be improved in the future\n"
-		final_welcome_message = init_message + "\n" + cli_version + temp_solution
+		final_welcome_message = init_message + "\n" + cli_version#the invalid command is + temp_solution
 		return final_welcome_message
 
     	# this is the main method - entry point on the app (cli)
     	def create_prompt(self):
+		################################
+		# FIXME - improve this
+		# it's not working in all cases
+		# the command to be specified using multiple lines
+		##################################
+		full_command = ""
 		while self.running_prompt:
 		    	user_value = raw_input('iDDB> ')
+			full_command += " " + str(user_value)
 			if self.end_of_command(user_value):
-				self.execute_command(user_value)
-				#print ("To be executed...")
+				self.execute_command(full_command)
+				#print ("To be executed... " + str(full_command))
+				full_command = ""
 		    	if user_value == "end" or user_value == "bye" or user_value == "exit":
 		        	print ("\n\nBye, have a nice day!")
 		        	self.running_prompt = False
@@ -75,6 +83,9 @@ class UserPrompt:
 	
 		# remove this character ; from the user command
 		actual_user_command = user_command[:-1]
+	
+		# TODO - remove in the future...
+		#print ("Current user command: " + actual_user_command)
 
 		for current_command in command:
 			if current_command.lower() in actual_user_command.lower():
@@ -182,6 +193,12 @@ class UserPrompt:
 						return
 					logger = PythonLogger("DEBUG")
 					logger.write_log("Current database is: " + str(current_database) + " ...")
+	
+		# let's handle table commands here
+		if table_command:
+			utility_command = self.find_between(actual_user_command, \
+								"table ", ";")
+			print ("Table command " + utility_command)
 			
 		print ("Command successfully executed. Status (0).\n")
 	
