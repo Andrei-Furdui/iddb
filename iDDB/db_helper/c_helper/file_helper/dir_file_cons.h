@@ -11,6 +11,7 @@
 // general usage
 #define MAX_STREAM_LENGTH 102400
 #define MIN_STREAM_LENGTH 1024
+#define TABLE_MANIPULATION_LENGTH 48
 #define DATE_LENGTH 10
 
 // log level accepted
@@ -21,4 +22,5 @@
 
 // the path starting from the $HOME dir
 #define DB_PATH "var/iDDB/database/"
+#define TABLE_NAME "table_name:"
 
