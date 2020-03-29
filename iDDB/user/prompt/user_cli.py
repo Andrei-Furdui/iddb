@@ -14,6 +14,9 @@ from python_logger import PythonLogger
 sys.path.insert(0, "../../db_core/python_work/table_work/")
 from database_manipulation import DatabaseUtility
 
+sys.path.insert(0, "../../db_core/python_work/table_work/")
+from table_manipulation import TableUtility
+
 # TODO TO CONTINUE WITH - to handle table commands
 # database ones are done
 
@@ -22,11 +25,16 @@ class UserPrompt:
 		self.cli_version = cli_version
 		self.dbi_version = dbi_version
 		self.running_prompt = True
-    
+
 	def prompt_message(self):
 		# add info into system.log file
 		logger = PythonLogger("INFO")
 		logger.write_log("An user is trying to connect to the database (CLI - entry point)...")
+
+		# make sure no old database exists
+		db_utility = DatabaseUtility()
+		db_utility.remove_database_file_content()
+
 
 		init_message = "Welcome to iDDB, version " + self.dbi_version
 		cli_version = "CLI Version: " + self.cli_version
@@ -52,9 +60,12 @@ class UserPrompt:
 		    	if user_value == "end" or user_value == "bye" or user_value == "exit":
 		        	print ("\n\nBye, have a nice day!")
 		        	self.running_prompt = False
+				db_utility = DatabaseUtility()
+				db_utility.remove_database_file_content()
 				logger = PythonLogger("INFO")
 				logger.write_log("The user ends current CLI session...")
-	
+
+
 	# An user command must have on the last position(s):
 	# 1. ;
 	#    OR
@@ -62,11 +73,11 @@ class UserPrompt:
 	def end_of_command(self, command):
 		"""Returns True is the user wants to execute its command,
 		 False otherwise"""
-		
+
 		if ";" in command or "\g" in command:
 			return True
 		return False
-			
+
 	def execute_command(self, user_command):
 		obj = AvailableCommands("available_commands.txt")
 		command = []
@@ -80,10 +91,10 @@ class UserPrompt:
 		# or a table one
 		database_command = False
 		table_command = False
-	
+
 		# remove this character ; from the user command
 		actual_user_command = user_command[:-1]
-	
+
 		# TODO - remove in the future...
 		#print ("Current user command: " + actual_user_command)
 
@@ -95,7 +106,7 @@ class UserPrompt:
 				elif TABLE.lower() in user_command.lower():
 					table_command = True
 					break
-		
+
 		# we'll know if the command is correct or not (first requirment)
 		if database_command is False and table_command is False:
 			print ("Invalid command. Status (-1).\n")
@@ -105,16 +116,16 @@ class UserPrompt:
 			# stop the parsing operation since no requirment
 			# is satisfied
 			return
-		
+
 		# this variable represents the current database - the one which
 		# the user wants to do his job
 		current_database = None
-		
+
 		# in this moment we now for sure what's the purpose of
 		# every command
-		
+
 		# let's handle database commands here
-		db_utility = DatabaseUtility()	
+		db_utility = DatabaseUtility()
 		# TODO - create a python dictionary for all commands below
 		if database_command:
 			# 1. display all existing DBs
@@ -128,7 +139,7 @@ class UserPrompt:
 					for iterator in temp_list:
 						print("Database name: " + iterator)
 					print ("\n")
-			
+
 			so_file = '../../out/so_files/database_manipulation.so'
 			c_db = CDLL(so_file)
 
@@ -136,7 +147,7 @@ class UserPrompt:
 			if "MKDIR".lower() in actual_user_command.lower():
 				db_name = self.find_between(actual_user_command, \
 								"database ", ";")
-				
+
 				# even if the C driver doesn't allow an empty db name
 				# make sure it doesn't reach that point if so
 				if db_name is None:
@@ -146,12 +157,12 @@ class UserPrompt:
 				if c_return != 1:
 					print ("Database creation has failed, check log file for details. Status (-1).")
 					return
-			
+
 			# 3. remove a database (no matter if it's empty or not)
 			if "RMDIR".lower() in actual_user_command.lower():
 				db_name = self.find_between(actual_user_command, \
 								"database ", ";")
-				
+
 				# even if the C driver doesn't allow an empty db name
 				# make sure it doesn't reach that point if so
 				if db_name is None:
@@ -161,7 +172,7 @@ class UserPrompt:
 				if c_return != 1:
 					print ("Database deletion has failed, check log file for details. Status (-1).")
 					return
-			
+
 			if "USE".lower() in actual_user_command.lower():
 				db_name = self.find_between(actual_user_command, \
 								"database ", ";")
@@ -183,7 +194,7 @@ class UserPrompt:
 						if iterator == db_name:
 							current_database = db_name
 							break
-						# make sure no database is set-up when the 
+						# make sure no database is set-up when the
 						# specified one doesn't exist
 						current_database = None
 					if current_database is None:
@@ -191,17 +202,53 @@ class UserPrompt:
 						logger.write_log("The user wants to use the database: " + str(db_name) + " but it doesn't exist...")
 						print ("The specified database does not exist. Status (-1).")
 						return
+
+					db_utility.save_current_database(str(current_database))
 					logger = PythonLogger("DEBUG")
 					logger.write_log("Current database is: " + str(current_database) + " ...")
-	
+
 		# let's handle table commands here
+
 		if table_command:
 			utility_command = self.find_between(actual_user_command, \
 								"table ", ";")
-			print ("Table command " + utility_command)
-			
+
+			# call the C driver table manipulation!
+			so_file = '../../out/so_files/table_manipulation.so'
+			c_db = CDLL(so_file)
+
+			# call the tableUtility driver - a python one
+			tb_utility = TableUtility(utility_command)
+
+			if "CREATE".lower() in actual_user_command.lower():
+
+				column_validity_result = tb_utility.check_column_name_validity()
+				if column_validity_result == 1:
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user's trying to create a new table but fails because he used multiple column with the same name...")
+					print ("Table creation has failed, check log file for details. Status (-1). ")
+					return;
+
+				elif column_validity_result == 2:
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user's trying to create a new table but fails because he used an invalid data type...")
+					print ("Table creation has failed, check log file for details. Status (-1). ")
+					return
+
+				elif column_validity_result == 3:
+					current_database = db_utility.get_current_database()
+					if current_database is None:
+						print ("You must use a database first. Status (-1).")
+						return
+
+					c_return = c_db.create_empty_table(str(current_database), str(tb_utility.get_table_name()), str(tb_utility.get_column_and_types() + ","))
+					if c_return != 1:
+						print ("Table creation has failed, check log file for details. Status (-1). ")
+						return
+
+
 		print ("Command successfully executed. Status (0).\n")
-	
+
 	def find_between(self, s, start, end):
 		"""Utility function used to extract the desired substring
 		from a given string. Needed, for example, to extract the table name"""
@@ -209,7 +256,7 @@ class UserPrompt:
   			return (s.split(start))[1].split(end)[0]
 		except IndexError:
 			return None
-		
+
 
 
 class AvailableCommands:
@@ -232,7 +279,7 @@ class AvailableCommands:
 
 	# Returns all commands accepted by the database driver
 	# as they are specified into the given file
-	# usually that file is located in the same location as this 
+	# usually that file is located in the same location as this
 	# python file and its name is: available_commands.txt
 
 	# TODO - what happens if the *.txt file doesn't exist???
@@ -245,12 +292,11 @@ class AvailableCommands:
 				continue
 			all_commands.append(line)
 		return all_commands
-		
-			
-        
+
+
+
 if __name__ == "__main__":
     	k = UserPrompt("1.0", "0.1")
     	prompt_info = k.prompt_message()
     	print (prompt_info)
     	k.create_prompt()
-	

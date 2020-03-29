@@ -22,5 +22,7 @@
 
 // the path starting from the $HOME dir
 #define DB_PATH "var/iDDB/database/"
+#define TABLE_FILE_EXTENSION ".iddb"
 #define TABLE_NAME "table_name:"
-
+#define COLUMN_NUMBER "column #"
+#define TABLE_PROPERTIES_COMMENT "###########################################\n"
