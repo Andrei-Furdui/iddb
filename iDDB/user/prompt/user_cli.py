@@ -52,6 +52,14 @@ class UserPrompt:
 		full_command = ""
 		while self.running_prompt:
 		    	user_value = raw_input('iDDB> ')
+				# treat help command - special cases
+			if str(user_value) == "help;": # the only way to achieve the
+				# help section - so use this harcoded word in this case
+				so_file = '../../out/so_files/help_command.so'
+				c_db = CDLL(so_file)
+				c_db.help_command()
+				continue
+
 			full_command += " " + str(user_value)
 			if self.end_of_command(user_value):
 				self.execute_command(full_command)
