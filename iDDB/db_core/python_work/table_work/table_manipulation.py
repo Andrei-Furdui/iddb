@@ -1,4 +1,6 @@
 import sys
+import traceback
+import os
 
 sys.path.insert(0, "../../../logger/python_logger/")
 from python_logger import PythonLogger
@@ -9,9 +11,14 @@ class TableUtility:
 		# this should have the following format
 		# example(c1-int, c2-string)
 		self.full_table_command = full_table_command
-		if len(self.full_table_command) == 0 :
+		try:
+			if len(self.full_table_command) == 0 :
+				logger = PythonLogger("ERROR")
+				logger.write_log("TableUtility class - received None full_table_command. Take action!")
+		except TypeError:
 			logger = PythonLogger("ERROR")
-			logger.write_log("TableUtility class - received None full_table_command. Take action!")
+			logger.write_log("TableUtility class - " + traceback.format_exc() +
+			"Probably the 'LS TABLE' command was specified - this is an accepted exception")
 
 	def find_between(self, s, start, end):
 		"""Utility function used to extract the desired substring
@@ -128,6 +135,48 @@ class TableUtility:
 			return 1
 
 		return 3
+
+	def get_all_tables(self, database_name):
+		"""Displays all existing tables from an existing database.
+		Returns 1 if an error occured or 2 otherwise"""
+
+		error = False
+		try:
+			if len(database_name) == 0 or database_name is None:
+				error = True
+		except:
+
+				error = True
+
+		if error:
+			print ("You must specify a database first. Status (-1).\n")
+			logger = PythonLogger("ERROR")
+			logger.write_log("TableUtility class - an user's trying to \
+			list all tables but without specifying an existing database")
+			return 1
+
+		# FIXME  - change this hardcoded path
+		root_db_path = "/home/doublea/var/iDDB/database/"
+		db_name = root_db_path + database_name
+		all_table = []
+		for root, dirs, files in os.walk(db_name):
+    			for file in files:
+        			if file.endswith('.iddb'):
+							all_table.append(file)
+
+		if len(all_table) == 0:
+			print ("There are no tables yet")
+		else:
+			# we don't want to display also the file extension
+			no_extension = 5
+			
+			print("All existing tables from database '" + database_name + "'...")
+			for i in range(0, len(all_table)):
+				print all_table[i][:-no_extension]
+
+		return 2
+
+
 
 
 '''

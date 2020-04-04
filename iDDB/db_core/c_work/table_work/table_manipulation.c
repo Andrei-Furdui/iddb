@@ -88,7 +88,7 @@ int create_empty_table(char *db_name, char *table_name, char *table_properties) 
 			strcat(aux_column_name, "\n");
 
 			result_fd = fprintf(fp, aux_column_name);
-			if (!result) {
+			if (!result_fd) {
 				strcat (log_info, "FALSE - writing to file operation failed");
 				write_log(INFO, log_info);
 				free (log_info);
@@ -168,6 +168,52 @@ int create_empty_table(char *db_name, char *table_name, char *table_properties) 
 
 	return TRUE;
 }
+
+// Deletes an existing tables.
+// Returns 1 if the opration was successfull, 0 otherwise
+int remove_table(char *table_name, char *db_name) {
+	// make sure the table name is fine
+	if (!check_null_argument(table_name) || !strlen(table_name)) {
+		return FALSE;
+	}
+
+	char *table_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH);
+	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+
+	if(table_path == NULL || log_info == NULL){
+		write_log(ERROR, "Memory allocation error - remove_table() method (1).");
+		return FALSE;
+	}
+
+
+	strcpy(table_path, home_path());
+	strcat(table_path, DB_PATH);
+	strcat(table_path, db_name);
+	strcat(table_path, "/");
+	strcat(table_path, table_name);
+	strcat(table_path, TABLE_FILE_EXTENSION);
+
+	int result = remove(table_path);
+	strcpy(log_info, "An user's trying to remove a table: ");
+	strcat(log_info, table_name);
+	strcat(log_info, ", result: ");
+	if(result == 0) {
+		strcat(log_info, "TRUE");
+		write_log(INFO, log_info);
+	}
+	else {
+		strcat(log_info, "FALSE - probably the table secified doesn't exist, full path: ");
+		strcat(log_info, table_path);
+		write_log(ERROR, log_info);
+	}
+
+	free (table_path);
+	free (log_info);
+
+	return (!result) ? TRUE:FALSE;
+
+}
+
 
 void main() {
 	printf("RESULT: %d\n", create_empty_table("test", "exemplu12345.bat", "column1_name-type,column2_name-type,column3_name-type,"));

@@ -233,7 +233,7 @@ class UserPrompt:
 				column_validity_result = tb_utility.check_column_name_validity()
 				if column_validity_result == 1:
 					logger = PythonLogger("ERROR")
-					logger.write_log("An user's trying to create a new table but fails because he used multiple column with the same name...")
+					logger.write_log("An user's trying to create a new table but fails because he used multiple columns with the same name...")
 					print ("Table creation has failed, check log file for details. Status (-1). ")
 					return;
 
@@ -254,6 +254,28 @@ class UserPrompt:
 						print ("Table creation has failed, check log file for details. Status (-1). ")
 						return
 
+			if "LS TABLE".lower() in actual_user_command.lower():
+
+				# if a specific table is given here - error
+				# since we're displaying all tables, not a single one
+				# here
+				if utility_command is not None:
+					print ("Invalid command. Status (-1).\n")
+					return
+
+				if tb_utility.get_all_tables(db_utility.get_current_database()) == 1:
+					return
+
+			if "DELETE TABLE".lower() in actual_user_command.lower():
+
+				if utility_command is None:
+					print ("You must specify a table to be removed. Status (-1).")
+					return
+
+				c_return = c_db.remove_table(utility_command, str(db_utility.get_current_database()))
+				if c_return != 1:
+					print ("Table deletion has failed, check log file for details. Status (-1).")
+					return
 
 		print ("Command successfully executed. Status (0).\n")
 

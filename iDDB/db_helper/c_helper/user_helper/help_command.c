@@ -44,7 +44,7 @@ void help_command() {
   strcat(final_message, help);
 
   printf ("%s\n", final_message);
-  write_log("DEBUG", "Displaying the help section...");
+  write_log(DEBUG, "Displaying the help section...");
 
   free (final_message);
 }
