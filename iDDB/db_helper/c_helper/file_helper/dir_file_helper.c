@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <dirent.h> 
+#include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
 //#include<stdio.h>
@@ -20,11 +20,11 @@ int check_null_argument (char *argument) {
 // database_call parameter specifies if this is a call from the
 // database manipulation level (e.g. the one in charge with creation/deletion
 // of database etc.). If so, this parameter should have the value 1, 0 otherwise
-int check_dir_exists (char *dir, int database_call) {  
-   	DIR *dr = opendir(dir); 
+int check_dir_exists (char *dir, int database_call) {
+   	DIR *dr = opendir(dir);
 	char *log_info = (char *) malloc (sizeof (char *) * MAX_STREAM_LENGTH/2);
     	if (dr == NULL) {
-		if (!database_call) { 
+		if (!database_call) {
 			strcpy(log_info, "check_dir_exists.c line 17 - ");
 			strcat(log_info, "Could not open the specified directory (or database): ");
 			strcat(log_info, dir);
@@ -38,11 +38,11 @@ int check_dir_exists (char *dir, int database_call) {
 			strcat(log_info, " but it doesn't exist...");
 			write_log(INFO, log_info);
 		}
-		closedir(dr); 
+		closedir(dr);
 		free(log_info);
-		return TRUE;	
-    	} 
-	
+		return TRUE;
+    	}
+
 	if (!database_call) {
 		strcpy(log_info, "Open the specified directory (or database): ");
 		strcat(log_info, dir);
@@ -53,7 +53,7 @@ int check_dir_exists (char *dir, int database_call) {
 		strcat(log_info, " and it already exists...");
 		write_log(INFO, log_info);
 	}
-	closedir(dr); 
+	closedir(dr);
 	free(log_info);
 	return FALSE;
 }
@@ -73,7 +73,7 @@ int check_file_exists (char *file) {
 
 // Returns the $HOME path for the current user
 char * home_path() {
-	const char *homedir;
+	char *homedir;
 	if ((homedir = getenv("HOME")) == NULL) {
     		homedir = getpwuid(getuid())->pw_dir;
 	}
@@ -82,14 +82,9 @@ char * home_path() {
 }
 
 // test - TODO - remove when project is done
-/*
+
 void main() {
 	//printf("%d\n", check_null_argument(""));
-	printf ("HERE - %d\n", check_dir_exists("/home/doublea/ana", 1));
+	//printf ("HERE - %d\n", check_dir_exists("/home/doublea/ana", 1));
 	printf("HERE - %s\n", home_path());
 }
-*/
-
-
-
-

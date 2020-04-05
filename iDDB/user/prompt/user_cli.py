@@ -17,8 +17,9 @@ from database_manipulation import DatabaseUtility
 sys.path.insert(0, "../../db_core/python_work/table_work/")
 from table_manipulation import TableUtility
 
-# TODO TO CONTINUE WITH - to handle table commands
-# database ones are done
+sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
+from dir_file_helper import DirFileHelper
+
 
 class UserPrompt:
 	def __init__(self, cli_version, dbi_version):
@@ -276,6 +277,24 @@ class UserPrompt:
 				if c_return != 1:
 					print ("Table deletion has failed, check log file for details. Status (-1).")
 					return
+
+			if "DESC TABLE".lower() in actual_user_command.lower():
+
+				if utility_command is None:
+					print ("You must specify a table to be described. Status (-1).")
+					return
+
+				if db_utility.get_current_database() is None:
+					print ("You must specify a database which contains the table to be describer. Status (-1).")
+					return
+
+				python_helper = DirFileHelper()
+				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
+				table_display = db_name + utility_command
+				#db_name += db_utility.get_current_database()
+				#print (db_name)
+				tb_utility.describe_table(table_display)
+
 
 		print ("Command successfully executed. Status (0).\n")
 

@@ -2,12 +2,13 @@
 #These commands should be specified using ONLY uppercase character
 #All lines starting with '#' or ' '(space) are ignored by the python interpretor
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#BE CAREFULL, THIS FILE SHOULD NOT CONTAIN AN EMPTY LINE AT THE BOTTOM
+#BE CAREFULL, THIS FILE SHOULD NOT CONTAIN AN EMPTY LINE AT THE END
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 1. Table specific commands
 CREATE TABLE
 UPDATE TABLE
 DELETE TABLE
+DESC TABLE
 LS TABLE
 # 2. Database specific commands
 LS DATABASE
