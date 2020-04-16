@@ -293,7 +293,9 @@ class UserPrompt:
 				table_display = db_name + utility_command
 				#db_name += db_utility.get_current_database()
 				#print (db_name)
-				tb_utility.describe_table(table_display)
+				result = tb_utility.describe_table(table_display, db_utility.get_current_database())
+				if result != 0:
+					return
 
 
 		print ("Command successfully executed. Status (0).\n")

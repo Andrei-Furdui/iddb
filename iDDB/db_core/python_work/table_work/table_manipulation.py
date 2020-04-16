@@ -18,7 +18,7 @@ class TableUtility:
 		except TypeError:
 			logger = PythonLogger("ERROR")
 			logger.write_log("TableUtility class - " + traceback.format_exc() +
-			"Probably the table was not specified - this is an accepted exception")
+			"Probably the table was not specified - this is an accepted exception (only in some cases!)")
 
 	def find_between(self, s, start, end):
 		"""Utility function used to extract the desired substring
@@ -176,15 +176,38 @@ class TableUtility:
 
 		return 2
 
-	def describe_table(self, table_name):
+	#TODO - when adding new properties to a table
+	#add them here as well
+	def describe_table(self, table_name, db_name):
 		"""Describes an existing table. If the specified table
 		doesn't exist, an except is raised and it is mentioned
-		to the user"""
+		to the user. If an error occurs, 1 is returned, 0 otherwise"""
 
 		# this has exaclty the same length as the constant defined
 		# in the C driver (see dir_file_cons.h, #TABLE_PROPERTIES_COMMENT)
 		stop_reading = "###########################################"
 		count_stop_reading = 0
+
+		# let's get current table name from the full path
+		slash = 0
+		temp_slash = 0
+		curr_pos = 0
+		position = 0
+
+		for i in table_name:
+			if i == "/":
+				slash += 1
+		
+		for c in table_name:
+			if temp_slash == slash:
+				curr_pos = position
+				break
+			if c == "/":
+				temp_slash += 1
+			position += 1
+
+		real_table_name = table_name[curr_pos:]
+		final_message = "\nDatabase: " + db_name + "\nTable: " + real_table_name + " =("
 
 		table_temp_read = table_name + ".iddb"
 		try:
@@ -208,35 +231,41 @@ class TableUtility:
 			for i in range(0, len(temp_list) - 1):
 				column_name.append(temp_list[i].split("-")[0])
 				column_type.append(temp_list[i].split("-")[1])
-	
-				
-			# let's display the content like this:
-			# +-------+---------
-			# | Field | type...	
-			# +-------+---------
 			
-			longest_col_name = len(self.get_longest_value(column_name))
-			longest_col_type = len(self.get_longest_value(column_type))
-			total_template = longest_col_name + longest_col_type
-
-			for i in range(0, total_template + 2):
-				if i == 0 or i == (total_template + 1):
-					print("+"),
-				elif i == longest_col_name:
-					print("+"),
+				
+			if len(column_name) != len(column_type):
+				logger = PythonLogger("ERROR")
+				logger.write_log("TableUtility class - " +
+				"Trying to describe a table: number of columns is different the number of column types")
+				print ("Unknown error has occurred. Check log file for details. Status (-1).")
+				return 1
+			
+			temp_message = ""
+			for i in range(0, len(column_name)):
+				if i == len(column_name) - 1:
+					temp_message += "\n" + column_name[i] + ": " + column_type[i]
 				else:
-					print ("-"),
-			# TODO - TO CONTINUE WITH
-			print ("\n")
+					temp_message += "\n" + column_name[i] + ": " + column_type[i] + ","
+			
+			final_message += temp_message + ")\n"
 
+			logger = PythonLogger("DEBUG")
+			logger.write_log("Describing table: " + real_table_name + " ...")
+			print final_message
+			
+			return 0
 		except IOError:
 			logger = PythonLogger("ERROR")
 			logger.write_log("TableUtility class - " + traceback.format_exc() +
 			"Trying to describe a table: the specified table name doesn't exist")
+			print ("You must specify an existing table to be describer. Status (-1).")
 		except:
 			logger = PythonLogger("ERROR")
 			logger.write_log("TableUtility class - " + traceback.format_exc() +
 			"Trying to describe a table - unknown exception occured")
+			print ("Unknown error has occurred. Check log file for details. Status (-1).")
+			
+		return 1
 	
 	# TODO - move this to the helper dir
 	def get_longest_value (self, list_to_check):
