@@ -5,6 +5,7 @@
 #BE CAREFULL, THIS FILE SHOULD NOT CONTAIN AN EMPTY LINE AT THE END
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # 1. Table specific commands
+INSERT INTO TABLE
 CREATE TABLE
 UPDATE TABLE
 DELETE TABLE

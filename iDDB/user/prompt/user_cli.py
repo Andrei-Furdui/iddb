@@ -115,7 +115,7 @@ class UserPrompt:
 				elif TABLE.lower() in user_command.lower():
 					table_command = True
 					break
-
+					
 		# we'll know if the command is correct or not (first requirment)
 		if database_command is False and table_command is False:
 			print ("Invalid command. Status (-1).\n")
@@ -264,7 +264,7 @@ class UserPrompt:
 					print ("Invalid command. Status (-1).\n")
 					return
 
-				if tb_utility.get_all_tables(db_utility.get_current_database()) == 1:
+				if tb_utility.get_all_tables(db_utility.get_current_database(), None) == 1:
 					return
 
 			if "DELETE TABLE".lower() in actual_user_command.lower():
@@ -291,12 +291,161 @@ class UserPrompt:
 				python_helper = DirFileHelper()
 				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
 				table_display = db_name + utility_command
-				#db_name += db_utility.get_current_database()
-				#print (db_name)
 				result = tb_utility.describe_table(table_display, db_utility.get_current_database())
 				if result != 0:
 					return
 
+			if "INSERT INTO".lower() in actual_user_command.lower():
+				if db_utility.get_current_database() is None:
+					print ("You must specify a database which contains the table to insert data into. Status (-1).")
+					return
+
+				if utility_command is None:
+					print ("You must specify a table to insert data into. Status (-1).")
+					return
+
+				python_helper = DirFileHelper()
+				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
+				
+				#print (db_name + " - " + utility_command)
+
+				# let's manipulate usefull info
+
+				###############################
+				#1 - table name
+				table_name = ""
+				for c in utility_command:
+					if c == "(":
+						break
+					table_name += c
+				table_name = table_name.replace(" ", "")
+
+				if len(table_name) < 1:
+					print ("You must specify a table to insert data into. Status (-1).")
+					return
+
+				# let's check if the table exists
+				if tb_utility.get_all_tables(db_utility.get_current_database(), table_name) == 4:
+					print ("Specified table doesn't exist. Status (-1).")
+					return
+				# end of precondition 1
+				################################
+
+				###################################
+				#2 - get columns from that table and check they exist
+
+				# we should have 2 open_brackets and 2 closed
+				open_brackets = 0
+				closed_brackest = 0
+				for c in utility_command:
+					if c == "(":
+						open_brackets += 1
+					elif c == ")":
+						closed_brackest += 1
+				
+				if open_brackets != 2 and closed_brackest != 2:
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user's trying to insert data into '" + table_name + 
+					"' but fails because didn't specify the required number of open/closed brackets...")
+					print ("Insert operation has failed due to a syntax error. Check log file for details. Status (-1).")
+					return
+
+				columns_from_user = []
+				first_index = utility_command.find("(")
+				last_index = utility_command.find(")")
+
+				valid_columns = utility_command[first_index + 1:last_index]
+				valid_columns += ","
+				aux = ""
+
+				for c in valid_columns:
+					if c == " ":
+						continue
+					if c != ",":
+						aux += c
+					else:
+						columns_from_user.append(aux)
+						aux = ""
+
+				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
+				full_table_path = db_name + table_name + ".iddb"
+
+				# this contains all columns from the current table - it's a list
+				all_columns_from_table = tb_utility.get_only_columns_name_from_table(full_table_path)
+				
+				# test if the number of given columns is greater than the number of existing
+				# columns - if so, error
+				if len(columns_from_user) > len(all_columns_from_table):
+					print("Insert operation has failed since more than needed columns were specified. Status (-1).")
+					return
+				
+				# save what columns are used to insert data, the others are filled up with null value (probably)
+				# feature AI: THE USER CAN INSERT SOME COLUMNS WHICH DON'T EXIST, THEY ARE NOT TAKEN INTO 
+				# CONSIDERATION AT ALL  
+				final_columns = []
+				for i in range(0, len(columns_from_user)):
+					temp = columns_from_user[i]
+					for j in range(0, len(all_columns_from_table)):
+						if temp == all_columns_from_table[j]:
+							final_columns.append(temp)
+							break
+
+				all_types_from_tabel = tb_utility.get_only_columns_types_from_table(full_table_path, final_columns)
+				
+				if len(final_columns) == 0 or len(all_types_from_tabel) == 0:
+					print ("Insert operation has failed since you must specify at least one valid column for inserting value. Status (-1).")
+					return
+
+				# end of precondition 2
+				################################
+
+				###################################
+				#3 - manipulate values section
+				go_next = False
+				if "VALUES".lower() in utility_command:
+					go_next = True
+
+				if go_next is False:
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user's trying to data into '" + table_name + 
+					"' but fails because the VALUES keyword is missing...")
+					print ("Insert operation has failed due to a syntax error. Check log file for details. Status (-1).")
+					return
+				
+				counter = 0
+				index_second_open_bracket = 0
+				index_second_closed_bracket = 0
+				for c in utility_command:
+					if counter == 2:
+						break
+					if c == "(":
+						counter += 1
+					index_second_open_bracket += 1
+				
+				counter = 0
+				for c in utility_command:
+					if counter == 2:
+						break
+					if c == ")":
+						counter += 1
+					index_second_closed_bracket += 1
+				
+				values = []
+				usefull_value = utility_command[index_second_open_bracket:index_second_closed_bracket - 1]
+				usefull_value += ","
+				aux = ""
+				for c in usefull_value:
+					if c == " ":
+						continue
+					if c != ",":
+						aux += c
+					else:
+						values.append(aux)
+						aux = ""
+					
+				if len(final_columns) != len(values):
+					print ("You must specify the same number of columns and values to be inserted. Status (-1).")
+					return
 
 		print ("Command successfully executed. Status (0).\n")
 

@@ -75,7 +75,7 @@ int create_empty_table(char *db_name, char *table_name, char *table_properties) 
 				free (aux_column_name);
 				free (temp_id);
 				free (temp_column_name);
-				close (fp);
+				fclose (fp);
 				return FALSE;
 			}
 
@@ -96,7 +96,7 @@ int create_empty_table(char *db_name, char *table_name, char *table_properties) 
 				free (aux_column_name);
 				free (temp_id);
 				free (temp_column_name);
-				close (fp);
+				fclose (fp);
 				return FALSE;
 			}
 
@@ -120,7 +120,7 @@ int create_empty_table(char *db_name, char *table_name, char *table_properties) 
 					free (aux_column_name);
 					free (temp_id);
 					free (temp_column_name);
-					close (fp);
+					fclose (fp);
 					return FALSE;
 				}
 			}
@@ -214,7 +214,74 @@ int remove_table(char *table_name, char *db_name) {
 
 }
 
+// This methods performs a table insert
+// It expects to receive a formated string already
+// without processing it
+// Returns 1 if the insert was successful, otherwise 0
+int do_insert_db(char *db_name, char *table_name, char *content){
+	// make sure the database name is fine
+	if (!check_null_argument(db_name) || !check_null_argument(content)) {
+		return FALSE;
+	}
 
+	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+
+	// this keeps current table name reference
+	char *local_table_name = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+
+	strcpy(database_path, home_path());
+	strcat(database_path, DB_PATH);
+	strcat(database_path, db_name);
+	strcpy(local_table_name, database_path);
+	strcat(local_table_name, table_name);
+
+	// the database doesn't exist
+	if (check_dir_exists(database_path, 1)) {
+		free (log_info);
+		free (database_path);
+		free (local_table_name);
+		return FALSE;
+	}
+
+	strcpy(log_info, "An user trying to insert data into: ");
+	strcat(log_info, local_table_name);
+
+	// we just want to append text to file
+	FILE *fd_table = fopen(local_table_name, "a");
+	if(fd_table == NULL) {
+		strcpy(log_info, "An user trying to insert data into: ");
+		strcat(log_info, local_table_name);
+		strcat(log_info, " but doesn't exist");
+		write_log(INFO, log_info);
+		free (log_info);
+		free (database_path);
+		free (local_table_name);
+		return FALSE;
+	}
+
+	strcat(log_info, "resut: ");
+	int result_fd = fprintf (fd_table, "%s", content);
+
+	if (!result_fd){
+		strcat(log_info, "FALSE");
+		
+	}
+	else {
+		strcat(log_info, "TRUE");
+	}
+
+	write_log(ERROR, log_info);
+	fclose(fd_table);
+	free (log_info);
+	free (database_path);
+	free (local_table_name);
+
+	return result_fd ? TRUE : FALSE;
+
+}
+
+/*
 void main() {
 	printf("RESULT: %d\n", create_empty_table("test", "exemplu12345.bat", "column1_name-type,column2_name-type,column3_name-type,"));
-}
+}*/

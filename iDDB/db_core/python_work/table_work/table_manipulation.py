@@ -136,9 +136,11 @@ class TableUtility:
 
 		return 3
 
-	def get_all_tables(self, database_name):
+	def get_all_tables(self, database_name, table_to_compare_to_insert):
 		"""Displays all existing tables from an existing database.
-		Returns 1 if an error occured or 2 otherwise"""
+		Returns 1 if an error occured, 2 otherwise and we don't do an insert
+		operation - just listing tables, 3 if the table for the insert operation exists,
+		4 if the table for the insert operation does not exist"""
 
 		error = False
 		try:
@@ -162,7 +164,7 @@ class TableUtility:
 		for root, dirs, files in os.walk(db_name):
     			for file in files:
         			if file.endswith('.iddb'):
-							all_table.append(file)
+						all_table.append(file)
 
 		if len(all_table) == 0:
 			print ("There are no tables yet")
@@ -170,9 +172,15 @@ class TableUtility:
 			# we don't want to display also the file extension
 			no_extension = 5
 
-			print("All existing tables from database '" + database_name + "'...")
-			for i in range(0, len(all_table)):
-				print all_table[i][:-no_extension]
+			if table_to_compare_to_insert is None:
+				print("All existing tables from database '" + database_name + "'...")
+				for i in range(0, len(all_table)):
+					print all_table[i][:-no_extension]
+			else:
+				for i in range(0, len(all_table)):
+					if all_table[i][:-no_extension] == table_to_compare_to_insert:
+						return 3
+				return 4
 
 		return 2
 
@@ -266,7 +274,87 @@ class TableUtility:
 			print ("Unknown error has occurred. Check log file for details. Status (-1).")
 			
 		return 1
-	
+
+	def get_only_columns_name_from_table(self, table_name):
+		"""Returns all columns from a given table - only columns name
+		not their type"""
+
+		# this has exaclty the same length as the constant defined
+		# in the C driver (see dir_file_cons.h, #TABLE_PROPERTIES_COMMENT)
+		stop_reading = "###########################################"
+		verify_reading = 0
+		table_name_in_file = "table_name"
+		all_columns_from_this_table = []
+		try:
+			file_table = open(table_name, "r")
+			for line in file_table:
+				if verify_reading == 2:
+					break
+				if stop_reading in line:
+					verify_reading += 1
+					continue
+
+				# we have 2 variants to end this process of reading from file
+				# let's try both and hope the current one works
+				# if not, the one with stop_reading will do the job
+				if table_name_in_file in line:
+					break
+				usefull_line = self.find_between(line.strip(), ":", "-")
+				all_columns_from_this_table.append(usefull_line)
+
+			file_table.close()
+		except IOError:
+			# we should NEVER reach this because all preconditions are done
+			# into the user_cli.py file
+			# IF WE END UP HERE - THERE'S A PROBLEM
+			logger = PythonLogger("ERROR")
+			logger.write_log("TableUtility class - " + traceback.format_exc() +
+			"Trying to insert data: the specified table name doesn't exist")
+			print ("You must specify an existing table to insert data into. Status (-1).")
+
+		return all_columns_from_this_table
+
+	def get_only_columns_types_from_table(self, table_name, columns):
+		"""Returns all columns types from a given table - only columns types
+		not their name"""
+
+		# this has exaclty the same length as the constant defined
+		# in the C driver (see dir_file_cons.h, #TABLE_PROPERTIES_COMMENT)
+		stop_reading = "###########################################"
+		table_name_in_file = "table_name"
+		verify_reading = 0
+		all_columns_type_from_this_table = []
+
+		file_table = open(table_name, "r")
+		for line in file_table:
+			if verify_reading == 2:
+				break
+			if stop_reading in line:
+				verify_reading += 1
+				continue
+
+			# we have 2 variants to end this process of reading from file
+			# let's try both and hope the current one works
+			# if not, the one with stop_reading will do the job
+			if table_name_in_file in line:
+				break 
+
+			current_line = line.strip()
+			for j in range(0, len(columns)):
+				if columns[j] in current_line:
+					index = current_line.find("-")
+					if index == -1:
+						break
+					else:
+						temp = ""
+						for i in range(index + 1, len(current_line)):
+							temp += current_line[i]
+						all_columns_type_from_this_table.append(temp)
+
+		file_table.close()	
+		return all_columns_type_from_this_table	
+
+
 	# TODO - move this to the helper dir
 	def get_longest_value (self, list_to_check):
 		max_len = -1
