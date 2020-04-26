@@ -296,6 +296,9 @@ class UserPrompt:
 					return
 
 			if "INSERT INTO".lower() in actual_user_command.lower():
+				logger = PythonLogger("DEBUG")
+				logger.write_log("Preparing preconditions for the insert operation...")
+
 				if db_utility.get_current_database() is None:
 					print ("You must specify a database which contains the table to insert data into. Status (-1).")
 					return
@@ -444,8 +447,74 @@ class UserPrompt:
 						aux = ""
 					
 				if len(final_columns) != len(values):
-					print ("You must specify the same number of columns and values to be inserted. Status (-1).")
+					print ("You must specify the same number of columns and values to be inserted or you a syntax error. Status (-1).")
 					return
+				
+				# final columns specified by the user: final_columns
+				# final values specified by the user: values (they correspund with final_columns)
+
+				# contains all columns which will have the default values (e.g. all non-specified 
+				# columns by the user)
+				non_inserted_columns = []
+				for i in range(0, len(all_columns_from_table)):
+					exists = False
+					temp_column = all_columns_from_table[i]
+					for j in range(0, len(final_columns)):
+						if temp_column == final_columns[j]:
+							exists = True
+							break
+					if exists is False:
+						non_inserted_columns.append(temp_column)
+				
+				# let's check what will have the default value or not
+				error_message = "Insert operation has failed because one/more column(s) contains an invalid value. Status (-1)."
+				final_string = ""
+				for i in range(0, len(all_columns_from_table)):
+					temp_column = all_columns_from_table[i]
+					inserted = False
+					for j in range(0, len(final_columns)):
+						if temp_column == final_columns[j]:
+
+							# let's check columns type
+							valid_type = type (values[j]) is  all_types_from_tabel[j]
+							if all_types_from_tabel[j] == "int":
+								try:
+									temp = int(values[j])
+								except ValueError:
+									print(error_message)
+									return
+							elif all_types_from_tabel[j] == "boolean":
+								if values[j] != "True" and values[j] != "False":
+									print (error_message)
+									return
+
+							# for this case, we can consider everything as being a string
+							# TODO - is that correct?
+							elif all_types_from_tabel[j] == "string":
+								pass
+
+							final_string += values[j] + "|"
+							inserted = True
+							break
+					if inserted is False:
+						final_string += "EMPTY" + "|"
+
+				if len(final_string) < 1:
+					logger = PythonLogger("ERROR")
+					logger.write_log("The string to be inserted is NULL - we don't know the reason...")
+					print ("Unexpected error occurred. Check log file for details. Status (-1).")
+					return
+				
+				# end of precondition 3
+				################################
+				logger = PythonLogger("DEBUG")
+				logger.write_log("Done with preconditions for the insert operation...")
+				
+				# now, since we worked out all preconditions, it's time to pass this string
+				# to the C driver
+				 
+				print ("HERE: " + final_string[:-1])	
+
 
 		print ("Command successfully executed. Status (0).\n")
 
