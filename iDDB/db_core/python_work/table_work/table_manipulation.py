@@ -266,7 +266,7 @@ class TableUtility:
 			logger = PythonLogger("ERROR")
 			logger.write_log("TableUtility class - " + traceback.format_exc() +
 			"Trying to describe a table: the specified table name doesn't exist")
-			print ("You must specify an existing table to be describer. Status (-1).")
+			print ("You must specify an existing table to be described. Status (-1).")
 		except:
 			logger = PythonLogger("ERROR")
 			logger.write_log("TableUtility class - " + traceback.format_exc() +

@@ -438,8 +438,8 @@ class UserPrompt:
 				usefull_value += ","
 				aux = ""
 				for c in usefull_value:
-					if c == " ":
-						continue
+					#if c == " ":
+					#	continue
 					if c != ",":
 						aux += c
 					else:
@@ -476,16 +476,17 @@ class UserPrompt:
 						if temp_column == final_columns[j]:
 
 							# let's check columns type
-							valid_type = type (values[j]) is  all_types_from_tabel[j]
+							# valid_type = type (values[j]) is  all_types_from_tabel[j]
 							if all_types_from_tabel[j] == "int":
 								try:
 									temp = int(values[j])
 								except ValueError:
-									print(error_message)
+									print("INTEGER VALIDATION: " + error_message)
 									return
 							elif all_types_from_tabel[j] == "boolean":
-								if values[j] != "True" and values[j] != "False":
-									print (error_message)
+								aux_boolean_value = values[j].replace(" ", "")
+								if aux_boolean_value != "true" and aux_boolean_value != "false":
+									print ("BOOLEAN VALIDATION: " + error_message)
 									return
 
 							# for this case, we can consider everything as being a string
@@ -512,9 +513,29 @@ class UserPrompt:
 				
 				# now, since we worked out all preconditions, it's time to pass this string
 				# to the C driver
-				 
-				print ("HERE: " + final_string[:-1])	
 
+				if db_utility.get_current_database() is None:
+					print ("You must specify a database before inserting data. Status (-1).")
+					return
+				
+				final_content = final_string[:-1]
+				final_content = final_content.replace("| ", "|")
+				final_content = final_content.replace(" |", "|")
+
+				# check if there're any empty space between/after separator |
+				# TODO - enable this at some point...
+				#for i in range(0, len(final_content)):
+				#	if final_content[i] == "|" and i < len(final_content) and i > 0:
+				#		if final_content[i + 1] == " " or final_content[i - 1]:
+				#			print ("Insert operation has failed since multiple spaces were specified between values. Status (-1).")
+				#			return
+
+				c_return = c_db.do_insert_db(str(db_utility.get_current_database()), 
+													 	table_name, final_content)
+
+				if c_return != 1:
+					print ("Insert operation has failed. Check log file for details. Status (-1).")
+					return
 
 		print ("Command successfully executed. Status (0).\n")
 

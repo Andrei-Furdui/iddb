@@ -223,9 +223,9 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 	if (!check_null_argument(db_name) || !check_null_argument(content)) {
 		return FALSE;
 	}
-
+	
 	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
-	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH);
 
 	// this keeps current table name reference
 	char *local_table_name = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
@@ -234,7 +234,9 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 	strcat(database_path, DB_PATH);
 	strcat(database_path, db_name);
 	strcpy(local_table_name, database_path);
+	strcat(local_table_name, "/");
 	strcat(local_table_name, table_name);
+	strcat(local_table_name, TABLE_FILE_EXTENSION);
 
 	// the database doesn't exist
 	if (check_dir_exists(database_path, 1)) {
@@ -245,7 +247,7 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 	}
 
 	strcpy(log_info, "An user trying to insert data into: ");
-	strcat(log_info, local_table_name);
+	strcat(log_info, table_name);
 
 	// we just want to append text to file
 	FILE *fd_table = fopen(local_table_name, "a");
@@ -260,7 +262,11 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 		return FALSE;
 	}
 
-	strcat(log_info, "resut: ");
+	// add new line to the content - in this way, next insert
+	// will be added into the next line
+	strcat(content, "\n");
+
+	strcat(log_info, " resut: ");
 	int result_fd = fprintf (fd_table, "%s", content);
 
 	if (!result_fd){
@@ -271,7 +277,7 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 		strcat(log_info, "TRUE");
 	}
 
-	write_log(ERROR, log_info);
+	write_log(INFO, log_info);
 	fclose(fd_table);
 	free (log_info);
 	free (database_path);

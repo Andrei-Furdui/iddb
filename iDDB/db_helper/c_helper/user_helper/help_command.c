@@ -15,7 +15,7 @@ void help_command() {
     return;
   }
 
-  char *adm_message = "\nFor information about iDDB, contact an administrator.\n";
+  char *adm_message = "\nFor more information about iDDB, contact an administrator.\n";
   char *available_commands = "List of all available iDDB commands:\n";
 
   // database commands section
@@ -25,14 +25,16 @@ void help_command() {
   char *us_db = "4. USE DATABASE   [db_name] \t(core) Sets the current database (an existing one) for this session\n";
 
   // table commands section
-  char *cr_tb = "\n5. CREATE TABLE [table_name (parameters...)] (core) Creates a new table\n";
-  char *rm_tb = "6. DELETE TABLE [table_name]                 (core) Removes an existing table\n";
-  char *de_tb = "7. DESC TABLE   [table_name]                 (core) Describes an existing table\n";
-  char *up_tb = "8. UPDATE TABLE [table_name (parameters...)] (core) Updates an existing table\n";
+  char *cr_tb = "\n5. CREATE TABLE [table_name (parameters...)]\t\t(core) Creates a new table\n";
+  char *rm_tb = "6. DELETE TABLE [table_name]                   \t\t(core) Removes an existing table\n";
+  char *de_tb = "7. DESC TABLE   [table_name]                   \t\t(core) Describes an existing table\n";
+  char *up_tb = "8. UPDATE TABLE [table_name (parameters...)]   \t\t(core) Updates an existing table\n";
 
-
+  char *in_tb = "\n9. INSERT INTO TABLE [table_name (parameters...)] \t(core) Inserts values into an existing table\n";
+  char *exm_command = "\n10. EXAMPLE [command] \t\t (aux) Shows an example of how to use this command";
+  
   // CAREFULL!!! - this should be the last command
-  char *help = "\n8. HELP \t\t\t (aux) Displays this section\n";
+  char *help = "\n11. HELP \t\t\t (aux) Displays this section\n";
 
   strcpy(final_message, adm_message);
   strcat(final_message, available_commands);
@@ -44,6 +46,8 @@ void help_command() {
   strcat(final_message, rm_tb);
   strcat(final_message, de_tb);
   strcat(final_message, up_tb);
+  strcat(final_message, in_tb);
+  strcat(final_message, exm_command);
   strcat(final_message, help);
 
   printf ("%s\n", final_message);
