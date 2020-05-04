@@ -147,7 +147,6 @@ class TableUtility:
 			if len(database_name) == 0 or database_name is None:
 				error = True
 		except:
-
 				error = True
 
 		if error:
