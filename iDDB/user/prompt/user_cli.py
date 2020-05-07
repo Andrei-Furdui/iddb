@@ -101,6 +101,9 @@ class UserPrompt:
 		database_command = False
 		table_command = False
 
+		# this is a special case - for select command
+		select_command = False
+
 		# remove this character ; from the user command
 		actual_user_command = user_command[:-1]
 
@@ -115,16 +118,24 @@ class UserPrompt:
 				elif TABLE.lower() in user_command.lower():
 					table_command = True
 					break
-					
-		# we'll know if the command is correct or not (first requirment)
-		if database_command is False and table_command is False:
-			print ("Invalid command. Status (-1).\n")
-			logger = PythonLogger("ERROR")
-			logger.write_log("An user tried to execute a command but\
-				 fails, the invalid command is: " + actual_user_command + " ...")
-			# stop the parsing operation since no requirment
-			# is satisfied
-			return
+		
+		if "select" in user_command.lower():
+			select_command = True
+
+		if select_command is False:
+			# we'll know if the command is correct or not (first requirment)
+			if database_command is False and table_command is False:
+				print ("Invalid command. Status (-1).\n")
+				logger = PythonLogger("ERROR")
+				logger.write_log("An user tried to execute a command but fails, the invalid command is: " + actual_user_command + " ...")
+				# stop the parsing operation since no requirment
+				# is satisfied
+				return
+		else:
+			# continue with the SELECT command
+			pass 
+
+		
 
 		# this variable represents the current database - the one which
 		# the user wants to do his job
@@ -218,7 +229,7 @@ class UserPrompt:
 
 		# let's handle table commands here
 
-		if table_command:
+		if table_command or select_command:
 			utility_command = self.find_between(actual_user_command, \
 								"table ", ";")
 
@@ -310,8 +321,6 @@ class UserPrompt:
 				python_helper = DirFileHelper()
 				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
 				
-				#print (db_name + " - " + utility_command)
-
 				# let's manipulate usefull info
 
 				###############################
@@ -536,6 +545,35 @@ class UserPrompt:
 				if c_return != 1:
 					print ("Insert operation has failed. Check log file for details. Status (-1).")
 					return
+
+			if "SELECT".lower() in actual_user_command.lower():
+				if db_utility.get_current_database() is None:
+					print ("You must specify a database which contains the table to select data from. Status (-1).")
+					return
+				
+				if "from" not in actual_user_command.lower():
+					logger = PythonLogger("ERROR")
+					logger.write_log("An user's trying to do a select but fails because the FROM keyword is missing...")
+					print("Select operation has failed due to a syntax error. Check log file for details. Status (-1).")
+					return
+
+				# unfortunately we treat each hardcoded case one by one
+				# in this way, the complexity is increased but for now
+				# let's do that in this way...
+				#1 TREAT CASE SELECT * FROM ..
+				if "select * from " in actual_user_command.lower():
+					s_asterix_table = self.find_between(actual_user_command, "from ", " ")
+
+					if tb_utility.get_all_tables(db_utility.get_current_database(), s_asterix_table) == 4:
+						print ("Specified table doesn't exist. Status (-1).")
+						return
+
+					db_name = db_utility.get_current_database()
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table))
+					if c_return != 1:
+						print ("Select operation has failed. Check log file for details. Status (-1).")
+						return
+
 
 		print ("Command successfully executed. Status (0).\n")
 

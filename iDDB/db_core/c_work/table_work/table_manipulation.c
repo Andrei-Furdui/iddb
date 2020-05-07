@@ -246,9 +246,6 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 		return FALSE;
 	}
 
-	strcpy(log_info, "An user trying to insert data into: ");
-	strcat(log_info, table_name);
-
 	// we just want to append text to file
 	FILE *fd_table = fopen(local_table_name, "a");
 	if(fd_table == NULL) {
@@ -261,6 +258,9 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 		free (local_table_name);
 		return FALSE;
 	}
+
+	strcpy(log_info, "An user trying to insert data into: ");
+	strcat(log_info, table_name);
 
 	// add new line to the content - in this way, next insert
 	// will be added into the next line
@@ -284,7 +284,92 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 	free (local_table_name);
 
 	return result_fd ? TRUE : FALSE;
+}
 
+// This methods performs a select * from ...
+// Returns TRUE is everything is ok or FALSE otherwise
+int select_all_from_table (char *db_name, char *table_name) {
+	// make sure the database name and table name is fine
+	if (!check_null_argument(db_name) || !check_null_argument(table_name)) {
+		return FALSE;
+	}
+
+	char *log_info = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	char *database_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH);
+
+	// this keeps current table name reference
+	char *local_table_name = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+
+	strcpy(database_path, home_path());
+	strcat(database_path, DB_PATH);
+	strcat(database_path, db_name);
+	strcpy(local_table_name, database_path);
+	strcat(local_table_name, "/");
+	strcat(local_table_name, table_name);
+	strcat(local_table_name, TABLE_FILE_EXTENSION);
+
+	// the database doesn't exist
+	if (check_dir_exists(database_path, 1)) {
+		free (log_info);
+		free (database_path);
+		free (local_table_name);
+		return FALSE;
+	}
+
+	FILE *fd_table = fopen(local_table_name, "r");
+	if(fd_table == NULL) {
+		strcpy(log_info, "An user trying to select all data from: ");
+		strcat(log_info, local_table_name);
+		strcat(log_info, " but doesn't exist");
+		write_log(INFO, log_info);
+		free (log_info);
+		free (database_path);
+		free (local_table_name);
+		return FALSE;
+	}
+
+	strcpy(log_info, "An user trying to select all data from: ");
+	strcat(log_info, table_name);
+
+	char *each_line = NULL;
+	size_t length = 0;
+	ssize_t read;	
+	short counter = 0;
+	int number_of_lines = 0;
+
+	printf("\nTable content:\n\n");
+	while((read = getline(&each_line, &length, fd_table)) != -1){
+		if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
+			counter++;
+			continue;
+		}
+		each_line[strcspn(each_line, "\n")] = 0;
+		if (counter >= 2) {
+			printf("%s\n", each_line);
+			number_of_lines++;
+		}
+		
+	}
+
+	if (number_of_lines == 0) { 
+		printf("No rows selected...\n");
+	}
+	else {
+		printf("\n%d rows selected...\n", number_of_lines);
+	}
+	
+
+	fclose(fd_table);
+	if (each_line) {
+		free (each_line);
+	}
+
+	strcat (log_info, " result: TRUE");
+	write_log(INFO, log_info);
+	free (log_info);
+	free (database_path);
+	free (local_table_name);
+	return TRUE;
 }
 
 /*
