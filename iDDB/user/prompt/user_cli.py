@@ -614,7 +614,6 @@ class UserPrompt:
 							list_columns.append(temp)
 							temp = ""
 					
-					
 
 			if "TRUNCATE ".lower() in actual_user_command.lower():
 				if db_utility.get_current_database() is None:
