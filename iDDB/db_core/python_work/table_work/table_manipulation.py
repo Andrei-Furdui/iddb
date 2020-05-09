@@ -5,6 +5,9 @@ import os
 sys.path.insert(0, "../../../logger/python_logger/")
 from python_logger import PythonLogger
 
+sys.path.insert(0, "../../../db_helper/python_helper/file_helper/")
+from dir_file_helper import DirFileHelper
+
 class TableUtility:
 	def __init__(self, full_table_command):
 
@@ -156,8 +159,8 @@ class TableUtility:
 			list all tables but without specifying an existing database")
 			return 1
 
-		# FIXME  - change this hardcoded path
-		root_db_path = "/home/doublea/var/iDDB/database/"
+		helper_obj = DirFileHelper()
+		root_db_path = helper_obj.get_home_path() + "var/iDDB/database/"
 		db_name = root_db_path + database_name
 		all_table = []
 		for root, dirs, files in os.walk(db_name):

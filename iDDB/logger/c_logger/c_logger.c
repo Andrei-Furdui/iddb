@@ -7,6 +7,14 @@
 #include <unistd.h>
 #include "../../db_helper/c_helper/file_helper/dir_file_cons.h"
 
+// this is a temporary solution because there's already
+// a functioned defined (see dir_file_helper.c)
+char *home_path_temp() {
+	char *homedir = getenv("HOME");
+	strcat(homedir, "/");
+	return homedir;
+}	
+
 // See ../python_logger/python_logger.py for more info
 void write_log(char *log_level, char *info) {
 	int fd;
@@ -43,7 +51,13 @@ void write_log(char *log_level, char *info) {
 	// this should contain the final version of the log line
 	char *c_final_log = (char *) malloc (sizeof(char *) * MAX_STREAM_LENGTH/2);
 
-	char *system_log_path = "/home/doublea/var/log/iDDB/";
+	// new solution as per installation requirement
+	char *temp_name = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	char *system_log_path = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH/2);
+	strcpy(temp_name, home_path_temp());
+	strcat(temp_name, "var/log/iDDB/");
+	strcat(system_log_path, temp_name);
+	
 	char *system_file_log = "system.log";
 	char *log_file = (char *) malloc (sizeof (char *) * MIN_STREAM_LENGTH/2);
 
@@ -58,7 +72,6 @@ void write_log(char *log_level, char *info) {
 	// see ../python_logger/python_logger.py)
 	strcpy(log_file, system_log_path);
 	strcat(log_file, system_file_log);
-
 	fd = open(log_file, O_RDWR | O_APPEND | O_CREAT);
 	if (fd < 0) {
 		// TODO - take action???
@@ -147,8 +160,12 @@ void write_log(char *log_level, char *info) {
 	free (temp_day_moment);
 	free (c_final_format);
 	free (c_final_log);
+	free (temp_name);
+	free (system_log_path);
+
 }
 
-//void main() {
-//	write_log(INFO, "A log from the C level here");
-//}
+/*
+void main() {
+	write_log(INFO, "A log from the C level here");
+}*/

@@ -4,6 +4,10 @@ import sys
 import time
 from threading import Thread
 
+sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
+from dir_file_helper import DirFileHelper
+
+
 NO_OF_PARAMETERS = 4
 ERROR_CODE = -1
 CSV_FILE = None
@@ -59,7 +63,8 @@ def get_columns_from_specified_table():
     global column_names
     global column_types
 
-    root_db_path = "/home/doublea/var/iDDB/database/"
+    helper_obj = DirFileHelper()
+    root_db_path = helper_obj.get_home_path() + "var/iDDB/database/"
     db_name = root_db_path + DATABASE_NAME + "/"
     table_name = db_name + TABLE_NAME + ".iddb"
     if path.exists(table_name) is False:
