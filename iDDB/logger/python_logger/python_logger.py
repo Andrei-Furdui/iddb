@@ -1,5 +1,10 @@
 import datetime
 import time
+import sys
+
+
+sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
+from dir_file_helper import DirFileHelper
 
 class PythonLogger:
 	def __init__(self, log_level, started_db = False):
@@ -11,9 +16,10 @@ class PythonLogger:
 			self.system_file_log = "iDDB_init.log"
 
 		# TODO - modify this path when available
-		self.system_log_path = "/home/doublea/var/log/iDDB/"	
+		self.helper_obj = DirFileHelper()
+		self.system_log_path = self.helper_obj.get_home_path() + "var/log/iDDB/"	
 		self.log_file = self.system_log_path + self.system_file_log	
-
+		
 		"""
 		Log levels accepted:
 		1. INFO

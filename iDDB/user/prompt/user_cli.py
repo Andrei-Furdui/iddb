@@ -30,13 +30,16 @@ class UserPrompt:
 
 	def prompt_message(self):
 		# add info into system.log file
-		logger = PythonLogger("INFO")
-		logger.write_log("An user is trying to connect to the database (CLI - entry point)...")
+		try:
+			logger = PythonLogger("INFO")
+			logger.write_log("An user is trying to connect to the database (CLI - entry point)...")
+		except IOError:
+			print ("Something's wrong with requirements. Exiting...")
+			sys.exit(-1)
 
 		# make sure no old database exists
 		db_utility = DatabaseUtility()
 		db_utility.remove_database_file_content()
-
 
 		init_message = "Welcome to iDDB, version " + self.dbi_version
 		cli_version = "CLI Version: " + self.cli_version
@@ -575,7 +578,8 @@ class UserPrompt:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
 				
-				if "select count(*) from " in actual_user_command.lower():
+				#2 TREAT CASE SELECT COUNT(*) FROM ...
+				elif "select count(*) from " in actual_user_command.lower():
 					s_asterix_table = self.find_between(actual_user_command, "from ", " ")
 					if tb_utility.get_all_tables(db_utility.get_current_database(), s_asterix_table) == 4:
 						print ("Specified table doesn't exist. Status (-1).")
@@ -585,10 +589,34 @@ class UserPrompt:
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
-				#######################################		
-				# continue with select from ... where...
+				
+				#3 TREAT CASE SELECT ... FROM ... WHERE...
+				#3.1 select column from table
+				elif "select " in actual_user_command and "from " in actual_user_command:
 
-			if "RM ALL FROM TABLE ".lower() in actual_user_command.lower():
+					columns_select = self.find_between(actual_user_command, "select ", " from")
+
+					if (columns_select is None) or "from" in columns_select:
+						print ("You must provide at least one column to be selected. Status (-1).")
+						return
+					
+					table_name1 = self.find_between(actual_user_command, "from ", " ")
+					if table_name1 is None:
+						table_name1 = self.find_between(actual_user_command, "from ", ";")
+
+					columns_select += " "
+					list_columns = []
+					temp = ""
+					for c in columns_select:
+						if c != " ":
+							temp += c
+						else:
+							list_columns.append(temp)
+							temp = ""
+					
+					
+
+			if "TRUNCATE ".lower() in actual_user_command.lower():
 				if db_utility.get_current_database() is None:
 					print ("You must specify a database which contains the table to remove from. Status (-1).")
 					return
@@ -599,7 +627,8 @@ class UserPrompt:
 						print ("Specified table doesn't exist. Status (-1).")
 						return
 
-				table_path = "/home/doublea/var/iDDB/database/" + db_utility.get_current_database()
+				helper_obj = DirFileHelper()
+				table_path = helper_obj.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database()
 				table_path += "/" + removing_table + ".iddb"
 				if tb_utility.delete_from_table(table_path) == 0:
 					print ("Removing operation has failed. Check log file for details. Status(-1).")

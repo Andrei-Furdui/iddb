@@ -80,11 +80,3 @@ char * home_path() {
 	strcat(homedir, "/");
 	return homedir;
 }
-
-// test - TODO - remove when project is done
-
-void main() {
-	//printf("%d\n", check_null_argument(""));
-	//printf ("HERE - %d\n", check_dir_exists("/home/doublea/ana", 1));
-	printf("HERE - %s\n", home_path());
-}
