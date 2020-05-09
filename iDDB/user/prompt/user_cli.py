@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # This file is responsible with CLI to the end user
 # It contains and decodes all user actions
 # It is the entry point to the db
@@ -569,12 +570,41 @@ class UserPrompt:
 						return
 
 					db_name = db_utility.get_current_database()
-					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table))
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 1)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
+				
+				if "select count(*) from " in actual_user_command.lower():
+					s_asterix_table = self.find_between(actual_user_command, "from ", " ")
+					if tb_utility.get_all_tables(db_utility.get_current_database(), s_asterix_table) == 4:
+						print ("Specified table doesn't exist. Status (-1).")
+						return
+					db_name = db_utility.get_current_database()
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 2)
+					if c_return != 1:
+						print ("Select operation has failed. Check log file for details. Status (-1).")
+						return
+				#######################################		
+				# continue with select from ... where...
 
+			if "RM ALL FROM TABLE ".lower() in actual_user_command.lower():
+				if db_utility.get_current_database() is None:
+					print ("You must specify a database which contains the table to remove from. Status (-1).")
+					return
 
+				removing_table = self.find_between(actual_user_command, "table ", " ")
+
+				if tb_utility.get_all_tables(db_utility.get_current_database(), removing_table) == 4:
+						print ("Specified table doesn't exist. Status (-1).")
+						return
+
+				table_path = "/home/doublea/var/iDDB/database/" + db_utility.get_current_database()
+				table_path += "/" + removing_table + ".iddb"
+				if tb_utility.delete_from_table(table_path) == 0:
+					print ("Removing operation has failed. Check log file for details. Status(-1).")
+					return
+							
 		print ("Command successfully executed. Status (0).\n")
 
 	def find_between(self, s, start, end):

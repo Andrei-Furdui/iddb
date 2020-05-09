@@ -288,7 +288,7 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 
 // This methods performs a select * from ...
 // Returns TRUE is everything is ok or FALSE otherwise
-int select_all_from_table (char *db_name, char *table_name) {
+int select_all_from_table (char *db_name, char *table_name, int select_count_asterix) {
 	// make sure the database name and table name is fine
 	if (!check_null_argument(db_name) || !check_null_argument(table_name)) {
 		return FALSE;
@@ -328,35 +328,82 @@ int select_all_from_table (char *db_name, char *table_name) {
 		return FALSE;
 	}
 
-	strcpy(log_info, "An user trying to select all data from: ");
-	strcat(log_info, table_name);
-
 	char *each_line = NULL;
 	size_t length = 0;
-	ssize_t read;	
-	short counter = 0;
+	ssize_t read;
 	int number_of_lines = 0;
+	short counter = 0;
 
-	printf("\nTable content:\n\n");
-	while((read = getline(&each_line, &length, fd_table)) != -1){
-		if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
-			counter++;
-			continue;
-		}
-		each_line[strcspn(each_line, "\n")] = 0;
-		if (counter >= 2) {
-			printf("%s\n", each_line);
-			number_of_lines++;
-		}
-		
-	}
+	switch (select_count_asterix)
+	{
+		case 1:
+			strcpy(log_info, "An user trying to select all data from ");
+			strcat(log_info, table_name);
+				
+			printf("\nTable content:\n\n");
+			while((read = getline(&each_line, &length, fd_table)) != -1){
+				if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
+					counter++;
+					continue;
+				}
+				each_line[strcspn(each_line, "\n")] = 0;
+				if (counter >= 2) {
+					printf("%s\n", each_line);
+					number_of_lines++;
+				}
+			
+			}
 
-	if (number_of_lines == 0) { 
-		printf("No rows selected...\n");
+			if (number_of_lines == 0) { 
+				printf("No rows selected...\n");
+			}
+			else {
+				printf("\n%d rows selected...\n", number_of_lines);
+			}
+
+			break;
+	
+		case 2:
+			strcpy(log_info, "An user trying to select number of lines from ");
+			strcat(log_info, table_name);
+			while((read = getline(&each_line, &length, fd_table)) != -1){
+				if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
+					counter++;
+					continue;
+				}
+				each_line[strcspn(each_line, "\n")] = 0;
+				if (counter >= 2) {
+					number_of_lines++;
+				}
+			
+			}
+			if (number_of_lines == 0) { 
+				printf("No rows selected...\n");
+			}
+			else {
+				printf("\nCount(*): %d\n\n", number_of_lines);
+			}
+			break;
+
+		default:
+			strcpy(log_info, "An user trying to select number of lines from ");
+			strcat(log_info, table_name);
+			strcat(log_info, " result: FALSE");
+			strcat(log_info, " because an invalid parameter was specified");
+
+			// clean up 
+			fclose(fd_table);
+			if (each_line) {
+				free (each_line);
+			}
+
+			write_log(INFO, log_info);
+			free (log_info);
+			free (database_path);
+			free (local_table_name);
+			return FALSE;
 	}
-	else {
-		printf("\n%d rows selected...\n", number_of_lines);
-	}
+	
 	
 
 	fclose(fd_table);
