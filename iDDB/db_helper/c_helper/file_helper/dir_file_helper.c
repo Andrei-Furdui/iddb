@@ -79,4 +79,4 @@ char * home_path() {
 	}
 	strcat(homedir, "/");
 	return homedir;
-}
+}	

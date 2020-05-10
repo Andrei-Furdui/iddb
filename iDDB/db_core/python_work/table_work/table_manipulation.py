@@ -63,7 +63,6 @@ class TableUtility:
 		except TypeError:
 			return ""
 
-
 	def get_duplicated(self, items):
 		"""Returns True if there are duplicates in this list
 		or false otherwise"""
@@ -71,7 +70,6 @@ class TableUtility:
 			if items.count(elem) > 1:
 				return True
 		return False
-
 
 	def get_actual_info(self):
 		TYPE_INT = "int"
@@ -113,7 +111,6 @@ class TableUtility:
 		# passed which is not correct
 
 		return actual_list
-
 
 	def check_column_name_validity(self):
 		"""Return 1 is there're columns which are duplicated,
@@ -387,6 +384,84 @@ class TableUtility:
 			logger.write_log("TableUtility class - An user's trying to remove all data from the table " + str(table_name) + " but it doesn't exist...")
 			print ("You must specify an existing table to remove data from. Status (-1).")
 			return 0
+
+	def special_select1(self, table, columns):
+		"""
+		Method used to select columns from table (without the where clause)
+		This must be executed in a separate thread
+
+		:param table: table to select data from
+		:param columns: columns used to show data from
+		"""
+
+		read_after = "###########################################"
+		counter = 0
+		with open(table) as f:
+			for line in f:
+				real_line = line.strip()
+				if counter >= 2:
+					real_line += "|"
+					
+					for i in range(0, len(columns)):
+						column_index = int(columns[i])
+						print(real_line.split("|")[column_index]),
+					print("")
+				if read_after in real_line:
+					counter += 1
+
+	def special_select2(self, table, columns, conditions, what_columns):
+		"""
+		Method used to select columns from table WITH WHERE CLAUSE
+		This must be executed in a separate thread
+
+		:param table: table to select data from
+		:param columns: columns used to show data from
+		:param conditions: conditions to be applied
+		:param what_columns: what columns to be displayed
+		"""
+
+		read_after = "###########################################"
+		counter = 0
+
+		# FIXME - doesn't work is where contains AND 
+		with open(table) as f:
+			for line in f:
+				real_line = line.strip()
+				if counter >= 2:
+
+					# new approach - starts here
+					for i in range(0, len(conditions)):
+
+						# we're checking all conditions to be True
+						if all([val in real_line for val in conditions]):
+							str_column_compare = real_line.split("|")[columns[i]]
+							if conditions[i] == str_column_compare:
+
+								for m in range(0, len(what_columns)):
+									column_index = int(what_columns[m])
+									print(real_line.split("|")[column_index]),
+								print("")
+								break	
+
+					# it works fine for only one condition...
+					# FIXME - to be decided if the above remains or not...
+					# which one will be used...		
+					'''
+					for i in range(0, len(conditions)):
+						
+						
+						str_column_compare = real_line.split("|")[columns[i]]
+						if conditions[i] == str_column_compare:
+
+							for m in range(0, len(what_columns)):
+								column_index = int(what_columns[m])
+								print(real_line.split("|")[column_index]),
+							print("")
+							break	
+						'''					
+				if read_after in real_line:
+					counter += 1
+
 
 	# TODO - move this to the helper dir
 	def get_longest_value (self, list_to_check):

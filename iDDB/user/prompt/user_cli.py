@@ -5,6 +5,7 @@
 
 import sys
 import six
+from threading import Thread
 
 # needed for calling the C driver
 from ctypes import *
@@ -261,6 +262,7 @@ class UserPrompt:
 
 				elif column_validity_result == 3:
 					current_database = db_utility.get_current_database()
+
 					if current_database is None:
 						print ("You must use a database first. Status (-1).")
 						return
@@ -593,7 +595,8 @@ class UserPrompt:
 				#3 TREAT CASE SELECT ... FROM ... WHERE...
 				#3.1 select column from table
 				elif "select " in actual_user_command and "from " in actual_user_command:
-
+					logger = PythonLogger("DEBUG")
+					logger.write_log("Selecting data with WHERE clause - start...")
 					columns_select = self.find_between(actual_user_command, "select ", " from")
 
 					if (columns_select is None) or "from" in columns_select:
@@ -604,16 +607,138 @@ class UserPrompt:
 					if table_name1 is None:
 						table_name1 = self.find_between(actual_user_command, "from ", ";")
 
-					columns_select += " "
+					columns_select += ", "
 					list_columns = []
 					temp = ""
 					for c in columns_select:
-						if c != " ":
+						if c != ",":
 							temp += c
 						else:
+							temp = temp.replace(" ", "")
 							list_columns.append(temp)
 							temp = ""
+
+					if len(list_columns) <= 0:
+						print("You must specify at least one column to display data for. Status (-1).")
+						return
+
+					# validate columns
+					python_helper = DirFileHelper()
+					db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
+					full_table_path = db_name + table_name1 + ".iddb"
+					all_columns_from_table = tb_utility.get_only_columns_name_from_table(full_table_path)
 					
+					if len(list_columns) > len(all_columns_from_table):
+						print("Select operation has failed since more than needed columns were specified. Status (-1).")
+						return
+					
+					final_columns = []
+
+					# this contains index for each column
+					# e.g. if the table X contains columns a1, b1, c1
+					# and b1 and c1 are used for doing the select
+					# then this should contain [1, 2], 0 represents column a1
+					# but it was not specified
+					final_columns_index = []
+					final_columns_index_byte = 0
+
+					for i in range(0, len(all_columns_from_table)):
+						for j in range(0, len(list_columns)):
+							if list_columns[j] == all_columns_from_table[i]:
+								final_columns.append(list_columns[j])
+								final_columns_index.append(str(final_columns_index_byte))
+								break
+						final_columns_index_byte += 1
+					
+					if len(final_columns) <= 0:
+						print ("Select operation has failed since you must specify at least one valid column for selecting value. Status (-1).")
+						return
+
+					future_reference_columns = final_columns
+					where_condition1 = self.find_between(actual_user_command, "where ", " ")
+					
+					# it means we don't have where clause
+					if where_condition1 is None:
+						print("\nColumns selected:")
+						for i in range(0, len(final_columns)):
+							print(final_columns[i]), 
+						print("\n\nResult:\n")
+						# let's select only that(these) column(s)
+						select_special1_thread = Thread(target = tb_utility.special_select1, \
+												args = (full_table_path, final_columns_index, ))
+    				    		select_special1_thread.start()
+					
+						# if after 30 sec we get timeout, something is really wrong
+						select_special1_thread.join(timeout=30)
+						if select_special1_thread.isAlive():
+							print ("\nSomething was wrong - core fault")
+							sys.exit(-1)
+						print("")
+
+					else:
+						# "@" is a special delimiter
+						actual_user_command += "@"
+						real_where = self.find_between(actual_user_command, "where ", "@")
+						
+						conditions = real_where.split(" and ")
+						real_conditions = []
+						for i in range(0, len(conditions)):
+							conditions[i] = conditions[i].replace(" ", "")
+							real_conditions.append(conditions[i])	
+
+
+						final_columns = []
+						final_conditions = []
+
+						# let's validate conditions
+						# here we're checking if the left operand 
+						# is an existing column
+						# e.g. column = condition (left operant = column)
+						for i in range(0, len(real_conditions)):
+							aux = real_conditions[i].split("=")
+							
+							for j in range(0, len(aux)/2):
+								final_columns.append(aux[j])
+							
+							for j in range(len(aux)/2, len(aux)):
+								final_conditions.append(aux[j])
+						
+						final_columns_validated = []
+						final_columns_validated_index = []
+						final_columns_validated_index_counter = 0
+
+						for i in range(0, len(all_columns_from_table)):
+							for j in range(0, len(final_columns)):
+								if all_columns_from_table[i] == final_columns[j]:
+									final_columns_validated.append(final_columns[j])
+									final_columns_validated_index.append(final_columns_validated_index_counter)
+									break
+							final_columns_validated_index_counter += 1
+						
+						if len(final_columns_validated) <= 0:
+							print("You must specify at least one valid column to display data for. Status (-1).")
+							return
+
+						print("\nColumns selected:")
+						for i in range(0, len(future_reference_columns)):
+							print(future_reference_columns[i]), 
+						print("\n\nResult:\n")
+
+						select_special2_thread = Thread(target = tb_utility.special_select2, \
+												args = (full_table_path, final_columns_validated_index, \
+												final_conditions, final_columns_index, ))
+    				    		select_special2_thread.start()
+						
+						# if after 30 sec we get timeout, something is really wrong
+						select_special2_thread.join(timeout=30)
+						if select_special2_thread.isAlive():
+							print ("\nSomething was wrong - core fault")
+							sys.exit(-1)
+						print("")
+					
+					logger = PythonLogger("DEBUG")
+					logger.write_log("Selecting data with WHERE clause - done...")
+						
 
 			if "TRUNCATE ".lower() in actual_user_command.lower():
 				if db_utility.get_current_database() is None:

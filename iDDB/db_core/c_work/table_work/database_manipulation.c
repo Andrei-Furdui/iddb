@@ -104,11 +104,3 @@ int delete_empty_database (char *db_name) {
 	return result == 0 ? TRUE:FALSE;
 
 }
-
-/*
-void main() {
-	printf("HERE- %d\n", delete_empty_database("qwe"));
-}*/
-
-
-

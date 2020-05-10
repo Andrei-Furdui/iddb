@@ -45,6 +45,7 @@ class DatabaseUtility:
 		f.close()
 
 	def get_current_database(self):
+		
 		try:
 			f = open(self.current_database_file, "r")
 			file_content = f.read()

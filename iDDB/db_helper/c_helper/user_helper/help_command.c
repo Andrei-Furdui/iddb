@@ -32,10 +32,11 @@ void help_command() {
 
   char *in_tb = "\n9. INSERT INTO TABLE [table_name (parameters...)] \t\t(core) Inserts values into an existing table\n";
   char *se_tb = "10. SELECT [expr]|*|count(*) FROM [table_name (properties...)] \t(core) Selects specific data from an existing table\n";
-  char *exm_command = "\n11. EXAMPLE [command] \t\t (aux) Shows an example of how to use this command";
+  char *tr_tb = "11. TRUNCATE TABLE [table_name] \t\t\t\t(core) Removes all data from an existing table\n";
+  char *exm_command = "\n12. EXAMPLE [command] \t\t (aux) Shows an example of how to use this command";
   
   // CAREFULL!!! - this should be the last command
-  char *help = "\n12. HELP \t\t\t (aux) Displays this section\n";
+  char *help = "\n13. HELP \t\t\t (aux) Displays this section\n";
 
   strcpy(final_message, adm_message);
   strcat(final_message, available_commands);
@@ -49,6 +50,7 @@ void help_command() {
   strcat(final_message, up_tb);
   strcat(final_message, in_tb);
   strcat(final_message, se_tb);
+  strcat(final_message, tr_tb);
   strcat(final_message, exm_command);
   strcat(final_message, help);
 
