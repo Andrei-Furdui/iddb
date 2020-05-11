@@ -22,6 +22,8 @@ from table_manipulation import TableUtility
 sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
 from dir_file_helper import DirFileHelper
 
+sys.path.insert(0, "../../db_core/net_utility/server/")
+from server_core import ServerWorker
 
 class UserPrompt:
 	def __init__(self, cli_version, dbi_version):
