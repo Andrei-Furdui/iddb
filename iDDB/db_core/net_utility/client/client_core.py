@@ -26,6 +26,10 @@ class ClientWorker:
         # so each net log message should contain this tag
         self.protocol_name = "TalkTalkProtocol: "
 
+        # if the target cannot be connected in 5 sec
+        # then there is a problem
+        self.socket_timeout = 5
+
         file_helper = DirFileHelper()
         self.yaml_file_path = file_helper.get_home_path() + "/var/iDDB/iddb.yaml"
 
@@ -73,21 +77,29 @@ class ClientWorker:
         is still alive, if not, we have a big issue here
         """
 
-        try:
-            # dummy socket, not the original one
-            # because it can be in-use at that time so
-            # it's dangerous it
-            all_ips = self.get_all_ips()
-            for i in range(0, len(all_ips)):
+        all_ips = self.get_server_ip_address()
+        for i in range(0, len(all_ips)):
+            try:
+                # dummy socket, not the original one
+                # because it can be in-use at that time so
+                # it's dangerous it
                 dummy_socket = socket.socket()
+                dummy_socket.settimeout(self.socket_timeout)
                 dummy_socket.connect((all_ips[i], self.PORT))
                 dummy_socket.close()
-        except:
-            logger = PythonLogger("ERROR")
-            ip_addr = self.get_local_ip()
-            logger.write_log(self.protocol_name + "This node: " + ip_addr + " is unable to connect to one of existing nodes")
+                logger = PythonLogger("DEBUG")
+                ip_addr = self.get_local_ip()
+                logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " successfully connected to " + all_ips[i])
+            except:
+                logger = PythonLogger("ERROR")
+                ip_addr = self.get_local_ip()
+                logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " is unable to connect to " + all_ips[i])
 
+    def test(self):
+        dummy_socket = socket.socket()
+        dummy_socket.connect(("192.168.1.7", self.PORT))
+        dummy_socket.close()
 
 c = ClientWorker()
 c.get_server_ip_address()
-print (c.get_local_ip())
+print (c.test_connection())
