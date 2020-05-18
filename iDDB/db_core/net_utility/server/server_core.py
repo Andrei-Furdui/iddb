@@ -31,6 +31,8 @@ class ServerWorker:
         # global class object for this socket
         self._server_socket = None
 
+        # this DB is using the TalkTalkProtocol
+        # so each net log message should contain this tag
         self.protocol_name = "TalkTalkProtocol: "
 
     def change_server_status(self, running_status):
@@ -77,7 +79,7 @@ class ServerWorker:
             logger = PythonLogger("ERROR")
             logger.write_log(self.protocol_name + "Communication error...")
 
-
+"""
 a = ServerWorker()
 a.change_server_status(True)
 a.start_server_preconditions()
@@ -88,3 +90,4 @@ time.sleep(10)
 a.change_server_status(False)
 print("HERE2:" + str(a.get_server_status()))
 time.sleep(10)
+"""
