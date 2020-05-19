@@ -26,6 +26,10 @@ echo "Shell: Done with so files..."
 # get back to the current PWD
 cd - >/dev/null
 
+# do the job here
+create_directories
+python set_requirements.py
+
 sleep 1
 echo "Shell: compiling and firing up C files..."
 # compile and execute the file which auto-gerenates the yaml
@@ -35,10 +39,5 @@ sleep 1
 sleep 1
 echo "Shell: done with C files..."
 sleep 1
-
-
-# do the job here
-create_directories
-python set_requirements.py
 
 echo -e "###################################"
