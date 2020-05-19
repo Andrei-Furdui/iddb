@@ -23,6 +23,15 @@ echo "Shell: compiling so files..."
 cd ../out/so_files/; sh build_so.sh
 echo "Shell: Done with so files..."
 
+sleep 1
+echo "Shell: compiling and firing up C files..."
+# compile and execute the file which auto-gerenates the yaml
+gcc -o ../out/so_files/generate_yaml_file ../out/so_files/generate_yaml_file.c
+../out/so_files/generate_yaml_file
+sleep 1
+echo "Shell: done with C files..."
+sleep 1
+
 # get back to the current PWD
 cd - >/dev/null
 
