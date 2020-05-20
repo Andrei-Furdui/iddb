@@ -78,13 +78,14 @@ class ServerWorker:
         else:
             logger = PythonLogger("ERROR")
             logger.write_log(self.protocol_name + "Communication error...")
-
+'''
 a = ServerWorker()
 a.change_server_status(True)
 a.start_server_preconditions()
 print("HERE1:" + str(a.get_server_status()))
 thread = Thread(target = a.start_real_server, args = ( ))
 thread.start()
+'''
 #time.sleep(10)
 #a.change_server_status(False)
 #print("HERE2:" + str(a.get_server_status()))

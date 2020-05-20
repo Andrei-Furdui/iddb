@@ -100,6 +100,8 @@ class ClientWorker:
         dummy_socket.connect(("192.168.1.7", self.PORT))
         dummy_socket.close()
 
+'''
 c = ClientWorker()
 c.get_server_ip_address()
 print (c.test_connection())
+'''

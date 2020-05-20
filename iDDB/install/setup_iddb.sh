@@ -40,4 +40,5 @@ sleep 1
 echo "Shell: done with C files..."
 sleep 1
 
+echo -e "\n\n***Do not forget to run the script: handle_net_package.sh - in this way, all netwroking elements will start ***\n"
 echo -e "###################################"
