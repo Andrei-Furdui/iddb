@@ -1,6 +1,7 @@
 import sys
 import time
 import os
+import subprocess
 from threading import Thread
 
 sys.path.insert(0, "../db_helper/python_helper/file_helper/")
@@ -53,6 +54,10 @@ elif arg_value == "false":
     print ("The server will stop at the next request...")
     _server.change_server_status(False)
     running_test_client = False
+
+    # if this python layer is not able to stop the Server...
+    # force stopping it by using native Linux layer
+    subprocess.call("./helper_stopping_server.sh", shell=True)
     write_value()
 else:
     print("Unknown parameter. Please use <true|false>!")

@@ -19,7 +19,7 @@ void generate_file_output(){
 
     char *ip_node="\n#specify a list of servers (all nodes from this \
                     \n#deployment). The following is an example: \
-                    \nip_node=a.b.c.d";
+                    \nip_node=a.b.c.d;e.f.g.h";
     
     char *port =   "\n#specify the port used by all nodes - this must \
                     \n#be the same for each node. \

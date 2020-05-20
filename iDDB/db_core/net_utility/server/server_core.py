@@ -33,7 +33,7 @@ class ServerWorker:
 
         # this DB is using the TalkTalkProtocol
         # so each net log message should contain this tag
-        self.protocol_name = "TalkTalkProtocol: "
+        self.protocol_name = "TalkTalkProtocol - Server: "
 
     def change_server_status(self, running_status):
         self.running = running_status

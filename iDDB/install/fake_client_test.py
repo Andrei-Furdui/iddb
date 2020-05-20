@@ -11,7 +11,7 @@ from python_logger import PythonLogger
 sys.path.insert(0, "../db_core/net_utility/client/")
 from client_core import ClientWorker
 
-TIMEOUT = 3 # 30 seconds
+TIMEOUT = 30 # 30 seconds
 
 def read_value():
 	f = None
