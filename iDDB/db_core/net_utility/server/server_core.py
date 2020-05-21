@@ -111,14 +111,13 @@ class ServerWorker:
                     except IndexError:
                         isTalkTalkProtocolMessageOK = True
                     
-                    print("HERE: " + identifier + " -> " + body)
                     if isTalkTalkProtocolMessageOK is False:
                         c.send(self.NOK_MSG)
                     else:
                         if "create_db" in identifier:
                             
-                            so_file = '../../../out/so_files/database_manipulation.so'
-		            c_db = CDLL(so_file)
+                            so_file = '../out/so_files/database_manipulation.so'
+                            c_db = CDLL(so_file)
                             c_return = c_db.create_database(str(body))
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
@@ -147,13 +146,13 @@ class ServerWorker:
             logger = PythonLogger("ERROR")
             logger.write_log(self.protocol_name + "Communication error...")
 
-
+"""
 a = ServerWorker()
 a.change_server_status(True)
 a.start_server_preconditions()
-thread = Thread(target = a.start_real_server, args = ( ))
+thread = Thread(target=a.start_real_server, args=())
 thread.start()
-
+"""
 #time.sleep(10)
 #a.change_server_status(False)
 #print("HERE2:" + str(a.get_server_status()))

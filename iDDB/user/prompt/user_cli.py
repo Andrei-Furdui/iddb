@@ -190,6 +190,8 @@ class UserPrompt:
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
 						isSocketOk = False
+						logger = PythonLogger("ERROR")
+						logger.write_log("An user's trying to create a new database but fails because one of remote servers returns an error, please investigate!")
 						break
 				
 				if (c_return != 1) or (isSocketOk == False):

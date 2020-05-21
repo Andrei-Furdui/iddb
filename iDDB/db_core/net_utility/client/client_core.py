@@ -117,20 +117,24 @@ class ClientWorker:
         local_ip_addr = self.get_local_ip()
         server_result = []
         for i in range(0, len(all_ips)):
+            try:
+                self._client_socket = socket.socket()
 
-            self._client_socket = socket.socket()
-
-            # we do not want lookup in this machine
-            # so, we try to avoid sending data to the Server 
-            # which is running in this host
-            if local_ip_addr in all_ips[i]:
-                continue
+                # we do not want lookup in this machine
+                # so, we try to avoid sending data to the Server 
+                # which is running in this host
+                if local_ip_addr in all_ips[i]:
+                    continue
+                
+                self._client_socket.connect((all_ips[i], self.PORT))
+                self._client_socket.send(message.encode())
+                data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
+                server_result.append(data)
+                self._client_socket.close()
             
-            self._client_socket.connect((all_ips[i], self.PORT))
-            self._client_socket.send(message.encode())
-            data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
-            server_result.append(data)
-            self._client_socket.close()
+            # socket exception (e.g. connection failed)
+            except:
+                server_result.append("NOK")
         
         return server_result
 '''
