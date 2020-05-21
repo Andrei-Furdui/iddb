@@ -35,6 +35,9 @@ class ServerWorker:
         # so each net log message should contain this tag
         self.protocol_name = "TalkTalkProtocol - Server: "
 
+        # maximum buffer that client can send to this server
+        self.MAX_RECV_BUFFER = 1024
+
     def change_server_status(self, running_status):
         self.running = running_status
         logger = PythonLogger("INFO")
@@ -45,7 +48,7 @@ class ServerWorker:
 
     def start_server_preconditions(self):
         try:
-            self._server_socket = socket.socket()
+            self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._server_socket.bind(('', self.PORT))
             self._server_socket.listen(self.number_of_clients)
             return True
@@ -70,6 +73,17 @@ class ServerWorker:
                 if self.get_server_status() is False:
                     self.stop_real_server()
                     break
+                
+                # we know that the client sent an action
+                # so we should handle it here, depending on the
+                # header message
+                data = c.recv(self.MAX_RECV_BUFFER).decode()
+                if len(data) > 0 :
+                    print ("Client said: " + data)
+                    time.sleep(1)
+                    c.send("Hello from Server")
+                
+
                 logger = PythonLogger("DEBUG")
                 logger.write_log(self.protocol_name + "Got connection from " + str(addr))
                 c.send("Hello " + str(self.get_server_status()))
@@ -78,14 +92,14 @@ class ServerWorker:
         else:
             logger = PythonLogger("ERROR")
             logger.write_log(self.protocol_name + "Communication error...")
-'''
+
+"""
 a = ServerWorker()
 a.change_server_status(True)
 a.start_server_preconditions()
-print("HERE1:" + str(a.get_server_status()))
 thread = Thread(target = a.start_real_server, args = ( ))
 thread.start()
-'''
+"""
 #time.sleep(10)
 #a.change_server_status(False)
 #print("HERE2:" + str(a.get_server_status()))

@@ -33,6 +33,9 @@ class ClientWorker:
         file_helper = DirFileHelper()
         self.yaml_file_path = file_helper.get_home_path() + "/var/iDDB/iddb.yaml"
 
+        # maximum buffer that server can send to this client
+        self.MAX_RECV_BUFFER = 1024
+
     def get_server_ip_address(self):
         all_ip = []
         with open(self.yaml_file_path) as f:
@@ -95,11 +98,40 @@ class ClientWorker:
                 ip_addr = self.get_local_ip()
                 logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " is unable to connect to " + all_ips[i])
 
+    """
+    @deprecated
     def test(self):
         dummy_socket = socket.socket()
         dummy_socket.connect(("192.168.1.7", self.PORT))
         dummy_socket.close()
+    """
 
+    def send_to_server(self, message):
+
+        if len(message) <=0 or message is None:
+            logger = PythonLogger("ERROR")
+            logger.write_log(self.protocol_name + " - send_to_server(): Invalid message to send")
+            return
+
+        all_ips = self.get_server_ip_address()
+        local_ip_addr = self.get_local_ip()
+
+        for i in range(0, len(all_ips)):
+
+            self._client_socket = socket.socket()
+
+            # we do not want lookup in this machine
+            # so, we try to avoid sending data to the Server 
+            # which is running in this host
+            if local_ip_addr in all_ips[i]:
+                continue
+            
+            self._client_socket.connect((all_ips[i], self.PORT))
+            self._client_socket.send(message.encode())
+            data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
+            print("Server said: " + data)
+            self._client_socket.close()
+            
 '''
 c = ClientWorker()
 c.get_server_ip_address()
