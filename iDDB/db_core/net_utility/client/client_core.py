@@ -115,7 +115,7 @@ class ClientWorker:
 
         all_ips = self.get_server_ip_address()
         local_ip_addr = self.get_local_ip()
-
+        server_result = []
         for i in range(0, len(all_ips)):
 
             self._client_socket = socket.socket()
@@ -129,9 +129,10 @@ class ClientWorker:
             self._client_socket.connect((all_ips[i], self.PORT))
             self._client_socket.send(message.encode())
             data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
-            print("Server said: " + data)
+            server_result.append(data)
             self._client_socket.close()
-            
+        
+        return server_result
 '''
 c = ClientWorker()
 c.get_server_ip_address()

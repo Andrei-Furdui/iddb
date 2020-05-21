@@ -22,8 +22,8 @@ from table_manipulation import TableUtility
 sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
 from dir_file_helper import DirFileHelper
 
-#sys.path.insert(0, "../../db_core/net_utility/server/")
-#from server_core import ServerWorker
+sys.path.insert(0, "../../db_core/net_utility/client/")
+from client_core import ClientWorker
 
 class UserPrompt:
 	def __init__(self, cli_version, dbi_version):
@@ -180,8 +180,19 @@ class UserPrompt:
 				if db_name is None:
 					print ("Invalid command. Status (-1).\n")
 					return
+				
 				c_return = c_db.create_database(db_name)
-				if c_return != 1:
+
+				client_socket = ClientWorker()
+				server_result = client_socket.send_to_server("create_db#$" + str(db_name))
+				isSocketOk = True
+
+				for i in range(0, len(server_result)):
+					if "NOK" in server_result[i]:
+						isSocketOk = False
+						break
+				
+				if (c_return != 1) or (isSocketOk == False):
 					print ("Database creation has failed, check log file for details. Status (-1).")
 					return
 
