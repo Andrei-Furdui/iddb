@@ -126,9 +126,9 @@ class ServerWorker:
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
                             else:
-                                c.send(self.OK_MSG)
+                                c.send(self.OK_MSG) 
                         elif "remove_db" in identifier:
-                            c_db.delete_empty_database(str(body))
+                            c_return = c_db.delete_empty_database(str(body))
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
                             else:
@@ -136,11 +136,11 @@ class ServerWorker:
                         elif "create_tb" in identifier:
 
                             body_parts = body.split("!")
-                            isBodyPartOk = True
+                            isBodyPartOk = False
                             try:
                                 aux_part = body_parts[3]
                             except IndexError:
-                                isBodyPartOk = False
+                                isBodyPartOk = True
 
                             if isBodyPartOk:
                                 # we must override this because
