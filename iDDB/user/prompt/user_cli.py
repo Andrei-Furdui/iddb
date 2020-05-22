@@ -180,21 +180,20 @@ class UserPrompt:
 				if db_name is None:
 					print ("Invalid command. Status (-1).\n")
 					return
-				
-				c_return = c_db.create_database(db_name)
 
 				client_socket = ClientWorker()
 				server_result = client_socket.send_to_server("create_db#$" + str(db_name))
-				isSocketOk = True
 
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
-						isSocketOk = False
 						logger = PythonLogger("ERROR")
 						logger.write_log("An user's trying to create a new database but fails because one of remote servers returns an error, please investigate!")
-						break
-				
-				if (c_return != 1) or (isSocketOk == False):
+						print ("Database creation has failed, check log file for details. Status (-1).")
+						return
+
+				c_return = c_db.create_database(db_name)
+
+				if c_return != 1:
 					print ("Database creation has failed, check log file for details. Status (-1).")
 					return
 
@@ -208,6 +207,17 @@ class UserPrompt:
 				if db_name is None:
 					print ("Invalid command. Status (-1).\n")
 					return
+
+				client_socket = ClientWorker()
+				server_result = client_socket.send_to_server("remove_db#$" + str(db_name))
+				
+				for i in range(0, len(server_result)):
+					if "NOK" in server_result[i]:
+						logger = PythonLogger("ERROR")
+						logger.write_log("An user's trying to delete a database but fails because one of remote servers returns an error, please investigate!")
+						print ("Database deletion has failed, check log file for details. Status (-1).")
+						return
+
 				c_return = c_db.delete_empty_database(db_name)
 				if c_return != 1:
 					print ("Database deletion has failed, check log file for details. Status (-1).")

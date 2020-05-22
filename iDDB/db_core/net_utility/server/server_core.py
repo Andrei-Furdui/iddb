@@ -114,10 +114,10 @@ class ServerWorker:
                     if isTalkTalkProtocolMessageOK is False:
                         c.send(self.NOK_MSG)
                     else:
+                        so_file = '../out/so_files/database_manipulation.so'
+                        c_db = CDLL(so_file)
                         if "create_db" in identifier:
                             
-                            so_file = '../out/so_files/database_manipulation.so'
-                            c_db = CDLL(so_file)
                             c_return = c_db.create_database(str(body))
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
@@ -125,7 +125,12 @@ class ServerWorker:
                                 c.send(self.OK_MSG)
                             #print("We should create new DB")
                         elif "remove_db" in identifier:
-                            print ("We should remove a DB")
+                            c_db.delete_empty_database(db_name)
+                            if c_return != 1:
+                                c.send(self.NOK_MSG)
+                            else:
+                                c.send(self.OK_MSG)
+                            #print ("We should remove a DB")
                         elif "create_tb" in identifier:
                             print ("We should create new table")
                         elif "remove_tb" in identifier:
