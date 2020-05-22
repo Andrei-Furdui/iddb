@@ -192,7 +192,7 @@ class UserPrompt:
 						print ("Database creation has failed, check log file for details. Status (-1).")
 						return
 				# end of socket part
-				
+
 				c_return = c_db.create_database(db_name)
 
 				if c_return != 1:
@@ -300,6 +300,13 @@ class UserPrompt:
 					client_socket = ClientWorker()
 					utility_str = current_database + "!" + tb_utility.get_table_name() + "!" + tb_utility.get_column_and_types() + ","
 					server_result = client_socket.send_to_server("create_tb#$" + utility_str)
+
+					for i in range(0, len(server_result)):
+						if "NOK" in server_result[i]:
+							logger = PythonLogger("ERROR")
+							logger.write_log("An user's trying to create a table but fails because one of remote servers returns an error, please investigate!")
+							print ("Table creation has failed, check log file for details. Status (-1). ")
+							return
 					# end of socket part
 					
 					c_return = c_db.create_empty_table(str(current_database), str(tb_utility.get_table_name()), str(tb_utility.get_column_and_types() + ","))
@@ -324,6 +331,19 @@ class UserPrompt:
 				if utility_command is None:
 					print ("You must specify a table to be removed. Status (-1).")
 					return
+
+				# socket part
+				client_socket = ClientWorker()
+				utility_str = utility_command + "!" + db_utility.get_current_database()
+				server_result = client_socket.send_to_server("remove_tb#$" + utility_str)
+
+				for i in range(0, len(server_result)):
+					if "NOK" in server_result[i]:
+						logger = PythonLogger("ERROR")
+						logger.write_log("An user's trying to remove a table but fails because one of remote servers returns an error, please investigate!")
+						print ("Table deletion has failed, check log file for details. Status (-1).")
+						return
+				# end of socket part
 
 				c_return = c_db.remove_table(utility_command, str(db_utility.get_current_database()))
 				if c_return != 1:

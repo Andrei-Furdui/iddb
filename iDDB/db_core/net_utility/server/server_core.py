@@ -134,7 +134,6 @@ class ServerWorker:
                             else:
                                 c.send(self.OK_MSG)
                         elif "create_tb" in identifier:
-
                             body_parts = body.split("!")
                             isBodyPartOk = False
                             try:
@@ -157,7 +156,26 @@ class ServerWorker:
                                 c.send(self.NOK_MSG)
                             #print ("We should create new table")
                         elif "remove_tb" in identifier:
-                            print ("We should remove a table")
+                            body_parts = body.split("!")
+                            isBodyPartOk = False
+                            try:
+                                aux_part = body_parts[2]
+                            except IndexError:
+                                isBodyPartOk = True
+
+                            if isBodyPartOk:
+                                # we must override this because
+                                # there's another section from the C driver
+                                # which handles table operations
+                                so_file = '../out/so_files/table_manipulation.so'
+                                c_db = CDLL(so_file)
+                                c_return = c_db.remove_table(str(body_parts[0]), str(body_parts[1]))
+                                if c_return != 1:
+                                   c.send(self.NOK_MSG)
+                                else:
+                                    c.send(self.OK_MSG)
+                            else:
+                                c.send(self.NOK_MSG)
                         else:
                             c.send(self.NOK_MSG)
                     #print ("Client said: " + data)
