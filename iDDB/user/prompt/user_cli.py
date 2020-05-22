@@ -181,6 +181,7 @@ class UserPrompt:
 					print ("Invalid command. Status (-1).\n")
 					return
 
+				# socket part
 				client_socket = ClientWorker()
 				server_result = client_socket.send_to_server("create_db#$" + str(db_name))
 
@@ -190,7 +191,8 @@ class UserPrompt:
 						logger.write_log("An user's trying to create a new database but fails because one of remote servers returns an error, please investigate!")
 						print ("Database creation has failed, check log file for details. Status (-1).")
 						return
-
+				# end of socket part
+				
 				c_return = c_db.create_database(db_name)
 
 				if c_return != 1:
@@ -208,6 +210,7 @@ class UserPrompt:
 					print ("Invalid command. Status (-1).\n")
 					return
 
+				# socket part
 				client_socket = ClientWorker()
 				server_result = client_socket.send_to_server("remove_db#$" + str(db_name))
 				
@@ -217,6 +220,7 @@ class UserPrompt:
 						logger.write_log("An user's trying to delete a database but fails because one of remote servers returns an error, please investigate!")
 						print ("Database deletion has failed, check log file for details. Status (-1).")
 						return
+				# end of socket part
 
 				c_return = c_db.delete_empty_database(db_name)
 				if c_return != 1:
@@ -277,7 +281,7 @@ class UserPrompt:
 					logger = PythonLogger("ERROR")
 					logger.write_log("An user's trying to create a new table but fails because he used multiple columns with the same name...")
 					print ("Table creation has failed, check log file for details. Status (-1). ")
-					return;
+					return
 
 				elif column_validity_result == 2:
 					logger = PythonLogger("ERROR")
@@ -292,6 +296,12 @@ class UserPrompt:
 						print ("You must use a database first. Status (-1).")
 						return
 
+					# socket part
+					client_socket = ClientWorker()
+					utility_str = current_database + "!" + tb_utility.get_table_name() + "!" + tb_utility.get_column_and_types() + ","
+					server_result = client_socket.send_to_server("create_tb#$" + utility_str)
+					# end of socket part
+					
 					c_return = c_db.create_empty_table(str(current_database), str(tb_utility.get_table_name()), str(tb_utility.get_column_and_types() + ","))
 					if c_return != 1:
 						print ("Table creation has failed, check log file for details. Status (-1). ")

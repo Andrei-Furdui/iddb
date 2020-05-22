@@ -57,6 +57,9 @@ class ServerWorker:
         2. NOK => at least one operation failed
 
         If an invalid message (header and/or body) is received, NOK must be sent back
+
+        The body can contain multiple "parts", these parts must be separated by "!", 
+        otherwise, NOK Must be sent back
         """
         self.OK_MSG = "OK"
         self.NOK_MSG = "NOK"
@@ -114,25 +117,45 @@ class ServerWorker:
                     if isTalkTalkProtocolMessageOK is False:
                         c.send(self.NOK_MSG)
                     else:
+
+                        # get a reference to the C driver
                         so_file = '../out/so_files/database_manipulation.so'
                         c_db = CDLL(so_file)
                         if "create_db" in identifier:
-                            
                             c_return = c_db.create_database(str(body))
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
                             else:
                                 c.send(self.OK_MSG)
-                            #print("We should create new DB")
                         elif "remove_db" in identifier:
-                            c_db.delete_empty_database(db_name)
+                            c_db.delete_empty_database(str(body))
                             if c_return != 1:
                                 c.send(self.NOK_MSG)
                             else:
                                 c.send(self.OK_MSG)
-                            #print ("We should remove a DB")
                         elif "create_tb" in identifier:
-                            print ("We should create new table")
+
+                            body_parts = body.split("!")
+                            isBodyPartOk = True
+                            try:
+                                aux_part = body_parts[3]
+                            except IndexError:
+                                isBodyPartOk = False
+
+                            if isBodyPartOk:
+                                # we must override this because
+                                # there's another section from the C driver
+                                # which handles table operations
+                                so_file = '../out/so_files/table_manipulation.so'
+                                c_db = CDLL(so_file)
+                                c_return = c_db.create_empty_table(str(body_parts[0]), str(body_parts[1]), str(body_parts[2]))
+                                if c_return != 1:
+                                   c.send(self.NOK_MSG)
+                                else:
+                                    c.send(self.OK_MSG)
+                            else:
+                                c.send(self.NOK_MSG)
+                            #print ("We should create new table")
                         elif "remove_tb" in identifier:
                             print ("We should remove a table")
                         else:
