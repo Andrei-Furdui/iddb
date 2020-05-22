@@ -551,8 +551,17 @@ class UserPrompt:
 								try:
 									temp = int(values[j])
 								except ValueError:
-									print("INTEGER VALIDATION: " + error_message)
-									return
+									pass
+									# TODO
+									# FIXME - fix this because when inserting data
+									# which contains int and boolean, boolean data
+									# is treated as the integer one, so the insert fails
+									# TAKE ACTION!!!
+									# TODO
+									# FIXME
+									
+									#print("INTEGER VALIDATION: " + error_message)
+									#return
 							elif all_types_from_tabel[j] == "boolean":
 								aux_boolean_value = values[j].replace(" ", "")
 								if aux_boolean_value != "true" and aux_boolean_value != "false":
