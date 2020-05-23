@@ -831,12 +831,13 @@ class UserPrompt:
 						return
 
 				helper_obj = DirFileHelper()
-				table_path = helper_obj.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database()
+				final_part = "var/iDDB/database/" + db_utility.get_current_database()
+				table_path = helper_obj.get_home_path() + final_part
 				table_path += "/" + removing_table + ".iddb"
 
 				# socket part
 				client_socket = ClientWorker()
-				server_result = client_socket.send_to_server("truncate_tb#$" + table_path)
+				server_result = client_socket.send_to_server("truncate_tb#$" + final_part + "/" + removing_table + ".iddb")
 
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
