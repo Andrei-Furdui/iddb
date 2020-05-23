@@ -49,6 +49,10 @@ class ServerWorker:
         3. create_tb => create new table
         4. remove_tb => remove existing table
 
+        5. insert_tb => insert data into table
+        (in this case, the body must have the following format:
+        db_name!table_name!data1!data2!...)
+
         For all identifiers above, the Server will create a new thread (if possible, if not,
         all work will be done in the Server thread) which is
         responsable with executing specific task AND the Server MUST reply to the 
@@ -176,6 +180,31 @@ class ServerWorker:
                                     c.send(self.OK_MSG)
                             else:
                                 c.send(self.NOK_MSG)
+                        elif "insert_tb" in identifier:
+                            # we don't need to validate input here because
+                            # we did this in the user_cli.py phase (if we insert
+                            # data via CLI)
+                            body_parts = body.split("!")
+                            db_name = body_parts[0]
+                            table_name = body_parts[1]
+                            if db_name is None or table_name is None:
+                                c.send(self.NOK_MSG)
+                            else:
+                                content = body_parts[2]
+                                try:
+                                    aux_content = body_parts[3]
+                                    c.send(self.NOK_MSG)
+                                except IndexError:
+                                    # we should go here, otherwise something is really wrong
+                                    # and send NOK to the client
+                                    c_return = c_db.do_insert_db(str(db_name), 
+													 	str(table_name), str(content))
+
+                                    if c_return != 1:
+                                        c.send(self.NOK_MSG)
+                                    else:
+                                        c.send(self.OK_MSG)
+                            #print ("We should insert data")
                         else:
                             c.send(self.NOK_MSG)
                     #print ("Client said: " + data)

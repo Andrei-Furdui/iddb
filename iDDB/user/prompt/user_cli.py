@@ -609,12 +609,27 @@ class UserPrompt:
 				#			print ("Insert operation has failed since multiple spaces were specified between values. Status (-1).")
 				#			return
 
+				
+				# socket part
+				client_socket = ClientWorker()
+				utility_str = db_utility.get_current_database() + "!" + table_name + "|" + final_content
+				server_result = client_socket.send_to_server("insert_tb#$" + utility_str)
+
+				for i in range(0, len(server_result)):
+					if "NOK" in server_result[i]:
+						logger = PythonLogger("ERROR")
+						logger.write_log("An user's trying to insert data but fails because one of remote servers returns an error, please investigate!")
+						print ("Insert operation has failed. Check log file for details. Status (-1).")	
+						return
+				
+				# end of socket part
+
 				c_return = c_db.do_insert_db(str(db_utility.get_current_database()), 
 													 	table_name, final_content)
-
 				if c_return != 1:
 					print ("Insert operation has failed. Check log file for details. Status (-1).")
 					return
+
 
 			if "SELECT".lower() in actual_user_command.lower():
 				if db_utility.get_current_database() is None:
