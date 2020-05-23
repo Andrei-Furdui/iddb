@@ -2,10 +2,84 @@
 # python bulk_insert.py table_name csv_file.csv
 import sys
 import time
+import socket
 from threading import Thread
 
 sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
 from dir_file_helper import DirFileHelper
+
+
+# SOCKET AREA
+# THIS IMPLEMENTATION IS COPIED FROM THE client_core.py FILE
+# WE DID THIS BECAUSE WE DO NOT NEED ALL THAT FUNCTION
+
+def send_to_server(message):
+    all_ips = get_server_ip_address()
+    local_ip_addr = get_local_ip()
+    server_result = []
+    for i in range(0, len(all_ips)):
+        try:
+            _client_socket = socket.socket()
+
+            # we do not want lookup in this machine
+            # so, we try to avoid sending data to the Server 
+            # which is running in this host
+            if local_ip_addr in all_ips[i]:
+                continue
+                
+            _client_socket.connect((all_ips[i], 9001))
+            _client_socket.send(message.encode())
+            data = _client_socket.recv(1024).decode()
+            server_result.append(data)
+            _client_socket.close()
+            
+            # socket exception (e.g. connection failed)
+        except:
+            server_result.append("NOK")
+        
+    return server_result
+
+
+def get_server_ip_address():
+    all_ip = []
+    # get yaml file path, if doesn't exist, exit script...
+    file_helper = DirFileHelper()
+    yaml_file_path = file_helper.get_home_path() + "var/iDDB/iddb.yaml"
+    try:
+        with open(yaml_file_path) as f:
+            for line in f:
+                curr_line = line.strip()
+                if "#" in curr_line or len(curr_line) <= 0:
+                    continue
+
+                # this is what we need
+                if "ip_node=" in curr_line:
+                    temp_result = find_between(curr_line, "=", " ")
+                    all_ip = temp_result.split(";")
+                    break
+    except IOError:
+        print ("It looks like iddb is not installed in this system or the yaml config file is missing. Please resolve them before executing this script")
+        print ("Nothing inserted...")
+        sys.exit(ERROR_CODE)
+    return all_ip
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('8.8.8.8', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+# END OF SOCKET AREA
+
+
+
+
+
 
 
 NO_OF_PARAMETERS = 4
@@ -106,23 +180,25 @@ def read_csv_file(start_line, stop_lines, table_name):
     start_time = time.time()
     local_table = ""
     try:
-        local_table = open(table_name,"a")
+        local_table = open(table_name, "a")
     except IOError:
         print ("Something is wrong. Exiting...")
         sys.exit(ERROR_CODE)
     
     counter = 0
-    with open(CSV_FILE, 'r') as file:
-        reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
-        # skip csv file header
-        next(reader)
-        for row in reader:
-            temp_content = ""
-            for i in range(0, len(row)):
-                temp_content += row[i] + "|"
-            temp_content = temp_content[:-1] + "\n"
-            local_table.write(temp_content)
-            counter += 1
+    if NUMBER_OF_LINES_FROM_CSV < 50:
+        with open(CSV_FILE, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
+            # skip csv file header
+            next(reader)
+            for row in reader:
+                temp_content = ""
+                for i in range(0, len(row)):
+                    temp_content += row[i] + "|"
+                temp_content = temp_content[:-1] + "\n"
+                send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
+                local_table.write(temp_content)
+                counter += 1
 
     floating_value = time.time() - start_time
     if int(floating_value) < 1:
@@ -130,7 +206,6 @@ def read_csv_file(start_line, stop_lines, table_name):
 
     execution_time = "{:.5f}".format(time.time() - start_time)
     print("Inserted " + str(counter) + " values in " + str(execution_time) + " sec...")
-
 
 try:
     rows = []
@@ -201,3 +276,4 @@ try:
 
 except IOError:
     print ("No such file or directory: '" + CSV_FILE + "'")
+

@@ -227,17 +227,12 @@ class ServerWorker:
                             if tb_utility.delete_from_table(table_path) == 0:
                                 c.send(self.NOK_MSG)
                             else:
-                                send(self.OK_MSG)
+                                c.send(self.OK_MSG)
                         else:
                             c.send(self.NOK_MSG)
-                    #print ("Client said: " + data)
-                    #time.sleep(1)
-                    #c.send("Hello from Server")
                 
-
                 logger = PythonLogger("DEBUG")
                 logger.write_log(self.protocol_name + "Got connection from " + str(addr))
-                #c.send("Hello " + str(self.get_server_status()))
                 c.close()
                 
         else:

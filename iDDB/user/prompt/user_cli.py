@@ -614,7 +614,6 @@ class UserPrompt:
 				client_socket = ClientWorker()
 				utility_str = db_utility.get_current_database() + "!" + table_name + "!" + final_content
 				server_result = client_socket.send_to_server("insert_tb#$" + utility_str)
-
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
 						logger = PythonLogger("ERROR")
