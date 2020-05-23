@@ -221,8 +221,10 @@ class ServerWorker:
                             # to truncate a table, now we only use a hacky way)
                             #tb_utility = TableUtility(None)
 
-                            tb_utility = HelpingServer(None)
-                            if tb_utility.delete_from_table(body) == 0:
+                            tb_utility = HelpingServer()
+                            helper_obj = DirFileHelper()
+                            table_path = helper_obj.get_home_path() + body
+                            if tb_utility.delete_from_table(table_path) == 0:
                                 c.send(self.NOK_MSG)
                             else:
                                 send(self.OK_MSG)

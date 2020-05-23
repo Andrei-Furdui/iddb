@@ -837,7 +837,8 @@ class UserPrompt:
 
 				# socket part
 				client_socket = ClientWorker()
-				server_result = client_socket.send_to_server("truncate_tb#$" + final_part + "/" + removing_table + ".iddb")
+				utility_str = "truncate_tb#$" + final_part + "/" + removing_table + ".iddb"
+				server_result = client_socket.send_to_server(utility_str)
 
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
