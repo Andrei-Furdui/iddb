@@ -612,7 +612,7 @@ class UserPrompt:
 				
 				# socket part
 				client_socket = ClientWorker()
-				utility_str = db_utility.get_current_database() + "!" + table_name + "|" + final_content
+				utility_str = db_utility.get_current_database() + "!" + table_name + "!" + final_content
 				server_result = client_socket.send_to_server("insert_tb#$" + utility_str)
 
 				for i in range(0, len(server_result)):
@@ -833,6 +833,19 @@ class UserPrompt:
 				helper_obj = DirFileHelper()
 				table_path = helper_obj.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database()
 				table_path += "/" + removing_table + ".iddb"
+
+				# socket part
+				client_socket = ClientWorker()
+				server_result = client_socket.send_to_server("truncate_tb#$" + table_path)
+
+				for i in range(0, len(server_result)):
+					if "NOK" in server_result[i]:
+						logger = PythonLogger("ERROR")
+						logger.write_log("An user's trying to truncate a table but fails because one of remote servers returns an error, please investigate!")
+						print ("Removing operation has failed. Check log file for details. Status(-1).")
+						return
+				# end of socket part
+
 				if tb_utility.delete_from_table(table_path) == 0:
 					print ("Removing operation has failed. Check log file for details. Status(-1).")
 					return

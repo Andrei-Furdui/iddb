@@ -10,6 +10,14 @@ from dir_file_helper import DirFileHelper
 sys.path.insert(0, "../../../logger/python_logger/")
 from python_logger import PythonLogger
 
+# doesn't work - FIXME
+"""
+sys.path.insert(0, "../../db_core/python_work/table_work")
+from table_manipulation import TableUtility
+"""
+
+from helping_server import HelpingServer
+
 class ServerWorker:
     
     def __init__(self):
@@ -51,7 +59,8 @@ class ServerWorker:
 
         5. insert_tb => insert data into table
         (in this case, the body must have the following format:
-        db_name!table_name!data1!data2!...)
+        db_name!table_name!data)
+        6. truncate_tb => remove all data from table
 
         For all identifiers above, the Server will create a new thread (if possible, if not,
         all work will be done in the Server thread) which is
@@ -197,6 +206,8 @@ class ServerWorker:
                                 except IndexError:
                                     # we should go here, otherwise something is really wrong
                                     # and send NOK to the client
+                                    so_file = '../out/so_files/table_manipulation.so'
+                                    c_db = CDLL(so_file)
                                     c_return = c_db.do_insert_db(str(db_name), 
 													 	str(table_name), str(content))
 
@@ -204,7 +215,17 @@ class ServerWorker:
                                         c.send(self.NOK_MSG)
                                     else:
                                         c.send(self.OK_MSG)
-                            #print ("We should insert data")
+                        elif "truncate_tb" in identifier:
+                            # FIXME - when enabling the failing import
+                            # enable also the following line (this is the correct way
+                            # to truncate a table, now we only use a hacky way)
+                            #tb_utility = TableUtility(None)
+
+                            tb_utility = HelpingServer(None)
+                            if tb_utility.delete_from_table(body) == 0:
+                                c.send(self.NOK_MSG)
+                            else:
+                                send(self.OK_MSG)
                         else:
                             c.send(self.NOK_MSG)
                     #print ("Client said: " + data)
