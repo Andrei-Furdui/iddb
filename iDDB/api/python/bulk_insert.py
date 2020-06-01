@@ -186,7 +186,7 @@ def read_csv_file(start_line, stop_lines, table_name):
         sys.exit(ERROR_CODE)
     
     counter = 0
-    if NUMBER_OF_LINES_FROM_CSV < 50:
+    if NUMBER_OF_LINES_FROM_CSV < 5000:
         with open(CSV_FILE, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
             # skip csv file header
@@ -202,7 +202,8 @@ def read_csv_file(start_line, stop_lines, table_name):
 
     floating_value = time.time() - start_time
     if int(floating_value) < 1:
-        time.sleep(0.5)
+        #time.sleep(0.5)
+        pass
 
     execution_time = "{:.5f}".format(time.time() - start_time)
     print("Inserted " + str(counter) + " values in " + str(execution_time) + " sec...")
