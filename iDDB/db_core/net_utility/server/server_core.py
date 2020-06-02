@@ -194,8 +194,21 @@ class ServerWorker:
                             # we did this in the user_cli.py phase (if we insert
                             # data via CLI)
                             message_to_be_inserted = body.split("&*()")
+                            
+                            # when doing a bulk insert we don't want to send a lot of
+                            # message through Internet, in this way we're trying to avoid
+                            # congestion of the network
+                            should_message_back = True
+
+                            if "insrt_tb_bulk" in identifier:
+                                should_message_back = False
 
                             for i in range(0, len(message_to_be_inserted)):
+
+                                # this case if possible when doing a bulk insert
+                                if len(message_to_be_inserted[i]) == 0:
+                                    continue
+
                                 body_parts = message_to_be_inserted[i].split("!")
                                 db_name = body_parts[0]
                                 table_name = body_parts[1]
@@ -214,10 +227,15 @@ class ServerWorker:
                                         c_return = c_db.do_insert_db(str(db_name), 
                                                             str(table_name), str(content))
 
-                                        if c_return != 1:
-                                            c.send(self.NOK_MSG)
+                                        if should_message_back:
+                                            if c_return != 1:
+                                                c.send(self.NOK_MSG)
+                                            else:
+                                                c.send(self.OK_MSG)
                                         else:
-                                            c.send(self.OK_MSG)
+                                            # let's sleep for a while here 
+                                            # letting the C driver to do its processing
+                                            time.sleep(0.1)
                             
                         elif "truncate_tb" in identifier:
                             # FIXME - when enabling the failing import

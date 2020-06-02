@@ -79,10 +79,6 @@ def get_local_ip():
 
 
 
-
-
-
-
 NO_OF_PARAMETERS = 4
 ERROR_CODE = -1
 CSV_FILE = None
@@ -229,7 +225,7 @@ def read_csv_file(start_line, stop_lines, table_name):
                     for i in range(0, len(row)):
                         temp_content += row[i] + "|"
                     temp_content = temp_content[:-1] + "\n"
-                    #local_table.write(temp_content)
+                    local_table.write(temp_content)
 
                     protocol_string = DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
                     bulk_string_protocol += protocol_string + "&*()"
@@ -239,16 +235,18 @@ def read_csv_file(start_line, stop_lines, table_name):
                     #thread1.start()
                     #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
                     counter += 1
-                    #time.sleep(WAIT_BEFORE_CACHE_ITERATION)
-                    if counter % 3 == 0:
-                        protocol_header = "insert_tb#$"
+                    
+                    if counter % 30 == 0:
+                        protocol_header = "insert_tb_bulk#$"
                         final_message = protocol_header + bulk_string_protocol
                         thread1 = Thread(target = send_to_server, args = (final_message, ))
                         thread1.start()
-                        break
+                        #local_table.flush()
+                        time.sleep(WAIT_BEFORE_CACHE_ITERATION)
+                        bulk_string_protocol = ""
 
                     stop += 1
-                    if stop == 6:
+                    if stop == 901:
                         break
 
         else:
