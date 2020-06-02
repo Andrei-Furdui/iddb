@@ -236,7 +236,7 @@ def read_csv_file(start_line, stop_lines, table_name):
                     #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
                     counter += 1
                     
-                    if counter % 30 == 0:
+                    if counter % 20 == 0:
                         protocol_header = "insert_tb_bulk#$"
                         final_message = protocol_header + bulk_string_protocol
                         thread1 = Thread(target = send_to_server, args = (final_message, ))
@@ -246,7 +246,7 @@ def read_csv_file(start_line, stop_lines, table_name):
                         bulk_string_protocol = ""
 
                     stop += 1
-                    if stop == 901:
+                    if stop == 1000:
                         break
 
         else:

@@ -200,7 +200,7 @@ class ServerWorker:
                             # congestion of the network
                             should_message_back = True
 
-                            if "insrt_tb_bulk" in identifier:
+                            if "insert_tb_bulk" in identifier:
                                 should_message_back = False
 
                             for i in range(0, len(message_to_be_inserted)):
@@ -215,7 +215,7 @@ class ServerWorker:
                                 if db_name is None or table_name is None:
                                     c.send(self.NOK_MSG)
                                 else:
-                                    content = body_parts[2]
+                                    >content = body_parts[2]
                                     try:
                                         aux_content = body_parts[3]
                                         c.send(self.NOK_MSG)
