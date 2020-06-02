@@ -121,7 +121,7 @@ class ServerWorker:
                     identifier = data.split("#$")[0]
                     body = data.split("#$")[1]
                     
-                    isTalkTalkProtocolMessageOK = False
+                    isTalkTalkProtocolMessageOK = False 
                     try:
                         unknown_part = data.split("#$")[2]
                     except IndexError:
@@ -194,32 +194,31 @@ class ServerWorker:
                             # we did this in the user_cli.py phase (if we insert
                             # data via CLI)
                             message_to_be_inserted = body.split("&*()")
-                            for i in range(0, len(message_to_be_inserted)):
-                                print("HERE: " + message_to_be_inserted[i])
-                            """
-                            body_parts = body.split("!")
-                            db_name = body_parts[0]
-                            table_name = body_parts[1]
-                            if db_name is None or table_name is None:
-                                c.send(self.NOK_MSG)
-                            else:
-                                content = body_parts[2]
-                                try:
-                                    aux_content = body_parts[3]
-                                    c.send(self.NOK_MSG)
-                                except IndexError:
-                                    # we should go here, otherwise something is really wrong
-                                    # and send NOK to the client
-                                    so_file = '../out/so_files/table_manipulation.so'
-                                    c_db = CDLL(so_file)
-                                    c_return = c_db.do_insert_db(str(db_name), 
-													 	str(table_name), str(content))
 
-                                    if c_return != 1:
+                            for i in range(0, len(message_to_be_inserted)):
+                                body_parts = message_to_be_inserted[i].split("!")
+                                db_name = body_parts[0]
+                                table_name = body_parts[1]
+                                if db_name is None or table_name is None:
+                                    c.send(self.NOK_MSG)
+                                else:
+                                    content = body_parts[2]
+                                    try:
+                                        aux_content = body_parts[3]
                                         c.send(self.NOK_MSG)
-                                    else:
-                                        c.send(self.OK_MSG)
-                            """
+                                    except IndexError:
+                                        # we should go here, otherwise something is really wrong
+                                        # and send NOK to the client
+                                        so_file = '../out/so_files/table_manipulation.so'
+                                        c_db = CDLL(so_file)
+                                        c_return = c_db.do_insert_db(str(db_name), 
+                                                            str(table_name), str(content))
+
+                                        if c_return != 1:
+                                            c.send(self.NOK_MSG)
+                                        else:
+                                            c.send(self.OK_MSG)
+                            
                         elif "truncate_tb" in identifier:
                             # FIXME - when enabling the failing import
                             # enable also the following line (this is the correct way

@@ -239,11 +239,11 @@ def read_csv_file(start_line, stop_lines, table_name):
                     #thread1.start()
                     #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
                     counter += 1
-                    time.sleep(WAIT_BEFORE_CACHE_ITERATION)
+                    #time.sleep(WAIT_BEFORE_CACHE_ITERATION)
                     if counter % 3 == 0:
                         protocol_header = "insert_tb#$"
                         final_message = protocol_header + bulk_string_protocol
-                        thread1 = Thread(target = send_to_server, args = (bulk_string_protocol, ))
+                        thread1 = Thread(target = send_to_server, args = (final_message, ))
                         thread1.start()
                         break
 
