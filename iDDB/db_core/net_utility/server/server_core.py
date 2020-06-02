@@ -193,6 +193,10 @@ class ServerWorker:
                             # we don't need to validate input here because
                             # we did this in the user_cli.py phase (if we insert
                             # data via CLI)
+                            message_to_be_inserted = body.split("&*()")
+                            for i in range(0, len(message_to_be_inserted)):
+                                print("HERE: " + message_to_be_inserted[i])
+                            """
                             body_parts = body.split("!")
                             db_name = body_parts[0]
                             table_name = body_parts[1]
@@ -215,6 +219,7 @@ class ServerWorker:
                                         c.send(self.NOK_MSG)
                                     else:
                                         c.send(self.OK_MSG)
+                            """
                         elif "truncate_tb" in identifier:
                             # FIXME - when enabling the failing import
                             # enable also the following line (this is the correct way

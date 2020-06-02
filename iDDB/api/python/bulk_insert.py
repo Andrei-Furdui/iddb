@@ -3,6 +3,7 @@
 import sys
 import time
 import socket
+import os
 from threading import Thread
 
 sys.path.insert(0, "../../db_helper/python_helper/file_helper/")
@@ -93,6 +94,14 @@ DATABASE_NAME = None
 NUMBER_OF_LINES_FROM_CSV = -1
 TABLE_FULL_PATH = ""
 
+# if the CSV file contains more than 100 records than we'll
+# cache them (all) and will be send later to remotes
+MAXIMUM_RECORDS_BEFORE_CACHE = 100
+helper_obj = DirFileHelper()
+CACHE_CSV_PATH = helper_obj.get_home_path() + "var/iDDB/"
+NO_OF_THREADS = -1
+WAIT_BEFORE_CACHE_ITERATION = 1 # at each 1 sec we send data
+
 if len(sys.argv) != NO_OF_PARAMETERS:
     print("Invalid number of parameters.\nUsage: python bulk_insert.py database_name table_name csv_file.csv")
     sys.exit(ERROR_CODE)
@@ -170,6 +179,9 @@ def get_columns_from_specified_table():
     TABLE_FULL_PATH = table_name
     f_table.close()
 
+def cache_csv_file(file_name):
+    command = os.popen("cp " + file_name + " " + CACHE_CSV_PATH + "/" + file_name)
+
 def read_csv_file(start_line, stop_lines, table_name):
     global CSV_FILE
 
@@ -187,18 +199,71 @@ def read_csv_file(start_line, stop_lines, table_name):
     
     counter = 0
     if NUMBER_OF_LINES_FROM_CSV < 5000:
-        with open(CSV_FILE, 'r') as file:
-            reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
-            # skip csv file header
-            next(reader)
-            for row in reader:
-                temp_content = ""
-                for i in range(0, len(row)):
-                    temp_content += row[i] + "|"
-                temp_content = temp_content[:-1] + "\n"
-                send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
-                local_table.write(temp_content)
-                counter += 1
+
+        # if the CSV file contains more than 100 records, 
+        # we must save its content in cache and that cache will
+        # be send to remotes later 
+        if NUMBER_OF_LINES_FROM_CSV > 100:
+            cache_csv_file(CSV_FILE)
+
+            if NUMBER_OF_LINES_FROM_CSV < 1000:
+                NO_OF_THREADS = 5
+            elif NUMBER_OF_LINES_FROM_CSV > 1000 and NUMBER_OF_LINES_FROM_CSV < 10000:
+                NO_OF_THREADS = 10
+            elif NUMBER_OF_LINES_FROM_CSV > 10001 and NUMBER_OF_LINES_FROM_CSV < 100000:
+                NO_OF_THREADS = 20
+            else:
+                NO_OF_THREADS = 30
+
+            print ("The insert operation was started. It uses " + str(NO_OF_THREADS) + " threads...")
+
+            bulk_string_protocol = ""
+            stop = 0
+            # TODO, to create 10 threads HERE
+            with open(CACHE_CSV_PATH + CSV_FILE , 'r') as file:
+                reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
+                # skip csv file header
+                next(reader)
+                for row in reader:
+                    temp_content = ""
+                    for i in range(0, len(row)):
+                        temp_content += row[i] + "|"
+                    temp_content = temp_content[:-1] + "\n"
+                    #local_table.write(temp_content)
+
+                    protocol_string = DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
+                    bulk_string_protocol += protocol_string + "&*()"
+
+                    #protocol_string = "insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
+                    #thread1 = Thread(target = send_to_server, args = (protocol_string, ))
+                    #thread1.start()
+                    #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
+                    counter += 1
+                    time.sleep(WAIT_BEFORE_CACHE_ITERATION)
+                    if counter % 3 == 0:
+                        protocol_header = "insert_tb#$"
+                        final_message = protocol_header + bulk_string_protocol
+                        thread1 = Thread(target = send_to_server, args = (bulk_string_protocol, ))
+                        thread1.start()
+                        break
+
+                    stop += 1
+                    if stop == 6:
+                        break
+
+        else:
+            with open(CSV_FILE, 'r') as file:
+                reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
+                # skip csv file header
+                next(reader)
+                for row in reader:
+                    temp_content = ""
+                    for i in range(0, len(row)):
+                        temp_content += row[i] + "|"
+                    temp_content = temp_content[:-1] + "\n"
+                    send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
+                    local_table.write(temp_content) 
+                    counter += 1
 
     floating_value = time.time() - start_time
     if int(floating_value) < 1:
