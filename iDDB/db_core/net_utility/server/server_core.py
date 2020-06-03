@@ -239,7 +239,8 @@ class ServerWorker:
                                     c.send(self.OK_MSG)
                             else:
                                 tb_utility = HelpingServer()
-                                table_path = helper_obj.get_home_path() + "/var/iDDB/database/" + db_name + table_name
+                                helper_obj = DirFileHelper()
+                                table_path = helper_obj.get_home_path() + "var/iDDB/database/" + db_name + "/" + table_name + ".iddb"
                                 tb_utility.do_insert(table_path, final_content_on_bulk_insert[:-1])
                                 
                             

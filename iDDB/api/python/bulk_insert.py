@@ -96,7 +96,7 @@ MAXIMUM_RECORDS_BEFORE_CACHE = 100
 helper_obj = DirFileHelper()
 CACHE_CSV_PATH = helper_obj.get_home_path() + "var/iDDB/"
 NO_OF_THREADS = -1
-WAIT_BEFORE_CACHE_ITERATION = 1 # at each 1 sec we send data
+WAIT_BEFORE_CACHE_ITERATION = 0.3
 
 if len(sys.argv) != NO_OF_PARAMETERS:
     print("Invalid number of parameters.\nUsage: python bulk_insert.py database_name table_name csv_file.csv")
@@ -214,8 +214,6 @@ def read_csv_file(start_line, stop_lines, table_name):
             print ("The insert operation was started. It uses " + str(NO_OF_THREADS) + " threads...")
 
             bulk_string_protocol = ""
-            stop = 0
-            # TODO, to create 10 threads HERE
             with open(CACHE_CSV_PATH + CSV_FILE , 'r') as file:
                 reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
                 # skip csv file header
@@ -230,17 +228,11 @@ def read_csv_file(start_line, stop_lines, table_name):
                     protocol_string = DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
                     bulk_string_protocol += protocol_string + "&*()"
 
-                    #protocol_string = "insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
-                    #thread1 = Thread(target = send_to_server, args = (protocol_string, ))
-                    #thread1.start()
-                    #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
-                    
-                    protocol_header = "insert_tb_bulk#$"
-                    final_message = protocol_header + bulk_string_protocol
-
                     # here, the MTU is limited at 1500, so let's make sure we don't send
                     # a message longer than that value   
-                    if len(final_message) > 1000:
+                    if len(bulk_string_protocol) > 1000:
+                        protocol_header = "insert_tb_bulk#$"
+                        final_message = protocol_header + bulk_string_protocol
                         thread1 = Thread(target = send_to_server, args = (final_message, ))
                         thread1.start()
                         time.sleep(WAIT_BEFORE_CACHE_ITERATION)
@@ -248,10 +240,8 @@ def read_csv_file(start_line, stop_lines, table_name):
                         # clear this and start over
                         bulk_string_protocol = ""
                         final_message = ""
-
                     counter += 1
                     
-
         else:
             with open(CSV_FILE, 'r') as file:
                 reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
