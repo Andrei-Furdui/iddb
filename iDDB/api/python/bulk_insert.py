@@ -30,7 +30,7 @@ def send_to_server(message):
                 
             _client_socket.connect((all_ips[i], 9001))
             _client_socket.send(message.encode())
-            data = _client_socket.recv(1024).decode()
+            data = _client_socket.recv(8192).decode()
             server_result.append(data)
             _client_socket.close()
             
@@ -234,20 +234,23 @@ def read_csv_file(start_line, stop_lines, table_name):
                     #thread1 = Thread(target = send_to_server, args = (protocol_string, ))
                     #thread1.start()
                     #send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
-                    counter += 1
                     
-                    if counter % 20 == 0:
-                        protocol_header = "insert_tb_bulk#$"
-                        final_message = protocol_header + bulk_string_protocol
+                    protocol_header = "insert_tb_bulk#$"
+                    final_message = protocol_header + bulk_string_protocol
+
+                    # here, the MTU is limited at 1500, so let's make sure we don't send
+                    # a message longer than that value   
+                    if len(final_message) > 1000:
                         thread1 = Thread(target = send_to_server, args = (final_message, ))
                         thread1.start()
-                        #local_table.flush()
                         time.sleep(WAIT_BEFORE_CACHE_ITERATION)
-                        bulk_string_protocol = ""
 
-                    stop += 1
-                    if stop == 1000:
-                        break
+                        # clear this and start over
+                        bulk_string_protocol = ""
+                        final_message = ""
+
+                    counter += 1
+                    
 
         else:
             with open(CSV_FILE, 'r') as file:

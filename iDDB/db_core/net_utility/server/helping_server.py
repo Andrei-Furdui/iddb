@@ -44,3 +44,15 @@ class HelpingServer:
 			logger.write_log("TableUtility class - An user's trying to remove all data from the table " + str(table_name) + " but it doesn't exist...")
 			print ("You must specify an existing table to remove data from. Status (-1).")
 			return 0
+	
+	def do_insert(self, table, content):
+		logger = PythonLogger("DEBUG")
+		result_message = "BulkInsert, result: "
+		try:
+			f = open(table, "a")
+			f.write(content)
+			f.close()
+			result_message += "True"
+		except:
+			result_message += "False, exception occured, probably the specified table doesn't exist'"
+		logger.write_log(result_message)

@@ -45,7 +45,7 @@ class ServerWorker:
         self.protocol_name = "TalkTalkProtocol - Server: "
 
         # maximum buffer that client can send to this server
-        self.MAX_RECV_BUFFER = 1024
+        self.MAX_RECV_BUFFER = 8192
 
         """
         TalkTalkProtocol has the following header:
@@ -167,7 +167,7 @@ class ServerWorker:
                                     c.send(self.OK_MSG)
                             else:
                                 c.send(self.NOK_MSG)
-                            #print ("We should create new table")
+
                         elif "remove_tb" in identifier:
                             body_parts = body.split("!")
                             isBodyPartOk = False
@@ -228,8 +228,6 @@ class ServerWorker:
                                         # we should go here, otherwise something is really wrong
                                         # and send NOK to the client
 
-                            
-
                             if should_message_back:
                                 so_file = '../out/so_files/table_manipulation.so'
                                 c_db = CDLL(so_file)
@@ -241,6 +239,8 @@ class ServerWorker:
                                     c.send(self.OK_MSG)
                             else:
                                 tb_utility = HelpingServer()
+                                table_path = helper_obj.get_home_path() + "/var/iDDB/database/" + db_name + table_name
+                                tb_utility.do_insert(table_path, final_content_on_bulk_insert[:-1])
                                 
                             
                         elif "truncate_tb" in identifier:

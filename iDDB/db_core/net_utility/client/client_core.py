@@ -34,7 +34,7 @@ class ClientWorker:
         self.yaml_file_path = file_helper.get_home_path() + "/var/iDDB/iddb.yaml"
 
         # maximum buffer that server can send to this client
-        self.MAX_RECV_BUFFER = 1024
+        self.MAX_RECV_BUFFER = 8192
 
     def get_server_ip_address(self):
         all_ip = []
