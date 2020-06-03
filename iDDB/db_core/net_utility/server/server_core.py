@@ -199,6 +199,10 @@ class ServerWorker:
                             # message through Internet, in this way we're trying to avoid
                             # congestion of the network
                             should_message_back = True
+                            final_content_on_bulk_insert = ""
+                            content = None
+                            db_name = None
+                            table_name = None
 
                             if "insert_tb_bulk" in identifier:
                                 should_message_back = False
@@ -215,27 +219,29 @@ class ServerWorker:
                                 if db_name is None or table_name is None:
                                     c.send(self.NOK_MSG)
                                 else:
-                                    >content = body_parts[2]
+                                    content = body_parts[2]
                                     try:
                                         aux_content = body_parts[3]
                                         c.send(self.NOK_MSG)
                                     except IndexError:
+                                        final_content_on_bulk_insert += content +"\n"
                                         # we should go here, otherwise something is really wrong
                                         # and send NOK to the client
-                                        so_file = '../out/so_files/table_manipulation.so'
-                                        c_db = CDLL(so_file)
-                                        c_return = c_db.do_insert_db(str(db_name), 
-                                                            str(table_name), str(content))
 
-                                        if should_message_back:
-                                            if c_return != 1:
-                                                c.send(self.NOK_MSG)
-                                            else:
-                                                c.send(self.OK_MSG)
-                                        else:
-                                            # let's sleep for a while here 
-                                            # letting the C driver to do its processing
-                                            time.sleep(0.1)
+                            
+
+                            if should_message_back:
+                                so_file = '../out/so_files/table_manipulation.so'
+                                c_db = CDLL(so_file)
+                                c_return = c_db.do_insert_db(str(db_name), 
+                                                            str(table_name), str(content))
+                                if c_return != 1:
+                                    c.send(self.NOK_MSG)
+                                else:
+                                    c.send(self.OK_MSG)
+                            else:
+                                tb_utility = HelpingServer()
+                                
                             
                         elif "truncate_tb" in identifier:
                             # FIXME - when enabling the failing import
