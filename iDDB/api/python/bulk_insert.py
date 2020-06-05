@@ -178,12 +178,11 @@ def get_columns_from_specified_table():
 def cache_csv_file(file_name):
     command = os.popen("cp " + file_name + " " + CACHE_CSV_PATH + "/" + file_name)
 
+def start_daemon_script(db_name, table_name, csv_file):
+    command = os.popen("python daemon_bulk_insert.py " + db_name + " " + table_name + " " + csv_file + " &")
+
 def read_csv_file(start_line, stop_lines, table_name):
     global CSV_FILE
-
-    #if (start_line >= stop_lines) or (start_line <= 0 or stop_lines <= 0):
-    #    print ("Something is wrong. Exiting...")
-    #    sys.exit(ERROR_CODE)
 
     start_time = time.time()
     local_table = ""
@@ -194,67 +193,37 @@ def read_csv_file(start_line, stop_lines, table_name):
         sys.exit(ERROR_CODE)
     
     counter = 0
-    if NUMBER_OF_LINES_FROM_CSV < 5000:
 
-        # if the CSV file contains more than 100 records, 
-        # we must save its content in cache and that cache will
-        # be send to remotes later 
-        if NUMBER_OF_LINES_FROM_CSV > 100:
-            cache_csv_file(CSV_FILE)
+    print ("The insert operation was started. Remote insert will be done in background...")
 
-            if NUMBER_OF_LINES_FROM_CSV < 1000:
-                NO_OF_THREADS = 5
-            elif NUMBER_OF_LINES_FROM_CSV > 1000 and NUMBER_OF_LINES_FROM_CSV < 10000:
-                NO_OF_THREADS = 10
-            elif NUMBER_OF_LINES_FROM_CSV > 10001 and NUMBER_OF_LINES_FROM_CSV < 100000:
-                NO_OF_THREADS = 20
-            else:
-                NO_OF_THREADS = 30
+    # this flag handles the daemon script responsible for 
+    # doing the bulk insert remote...
+    daemon_script_launched = False
 
-            print ("The insert operation was started. It uses " + str(NO_OF_THREADS) + " threads...")
+    cache_csv_file(CSV_FILE)
 
-            bulk_string_protocol = ""
-            with open(CACHE_CSV_PATH + CSV_FILE , 'r') as file:
-                reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
-                # skip csv file header
-                next(reader)
-                for row in reader:
-                    temp_content = ""
-                    for i in range(0, len(row)):
-                        temp_content += row[i] + "|"
-                    temp_content = temp_content[:-1] + "\n"
-                    local_table.write(temp_content)
+    bulk_string_protocol = ""
+    with open(CSV_FILE , 'r') as file:
+        reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
+        # skip csv file header
+        next(reader)
+        for row in reader:
+            temp_content = ""
+            for i in range(0, len(row)):
+                temp_content += row[i] + "|"
+            temp_content = temp_content[:-1] + "\n"
+            local_table.write(temp_content)
 
-                    protocol_string = DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
-                    bulk_string_protocol += protocol_string + "&*()"
-
-                    # here, the MTU is limited at 1500, so let's make sure we don't send
-                    # a message longer than that value   
-                    if len(bulk_string_protocol) > 1000:
-                        protocol_header = "insert_tb_bulk#$"
-                        final_message = protocol_header + bulk_string_protocol
-                        thread1 = Thread(target = send_to_server, args = (final_message, ))
-                        thread1.start()
-                        time.sleep(WAIT_BEFORE_CACHE_ITERATION)
-
-                        # clear this and start over
-                        bulk_string_protocol = ""
-                        final_message = ""
-                    counter += 1
+            protocol_string = DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1]                    
+            bulk_string_protocol += protocol_string + "&*()"
                     
-        else:
-            with open(CSV_FILE, 'r') as file:
-                reader = csv.reader(file, quoting=csv.QUOTE_ALL, skipinitialspace=True)
-                # skip csv file header
-                next(reader)
-                for row in reader:
-                    temp_content = ""
-                    for i in range(0, len(row)):
-                        temp_content += row[i] + "|"
-                    temp_content = temp_content[:-1] + "\n"
-                    send_to_server("insert_tb#$" + DATABASE_NAME + "!" + TABLE_NAME + "!" + temp_content[:-1])
-                    local_table.write(temp_content) 
-                    counter += 1
+            if daemon_script_launched is False:
+                thread = Thread(target = start_daemon_script, args = (DATABASE_NAME, TABLE_NAME, CSV_FILE, ))
+                thread.setDaemon(True)
+                thread.start()
+                daemon_script_launched = True
+            counter += 1
+
 
     floating_value = time.time() - start_time
     if int(floating_value) < 1:

@@ -47,9 +47,14 @@ class HelpingServer:
 	
 	def do_insert(self, table, content):
 		logger = PythonLogger("DEBUG")
-		result_message = "BulkInsert, result: "
+		result_message = "Received BulkInsert, result: "
 		try:
 			f = open(table, "a")
+
+			# this concatenation is needed because the C driver
+			# doesn't add a new line when doing a bulk insert, so we're
+			# manually adding this, not the best way to do this but...
+			content = content + "\n"
 			f.write(content)
 			f.close()
 			result_message += "True"

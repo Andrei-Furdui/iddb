@@ -26,9 +26,9 @@ class ClientWorker:
         # so each net log message should contain this tag
         self.protocol_name = "TalkTalkProtocol - Client: "
 
-        # if the target cannot be connected in 5 sec
+        # if the target cannot be connected in 10 sec
         # then there is a problem
-        self.socket_timeout = 5
+        self.socket_timeout = 10
 
         file_helper = DirFileHelper()
         self.yaml_file_path = file_helper.get_home_path() + "/var/iDDB/iddb.yaml"
@@ -119,7 +119,7 @@ class ClientWorker:
         for i in range(0, len(all_ips)):
             try:
                 self._client_socket = socket.socket()
-
+                self._client_socket.settimeout(self.socket_timeout)
                 # we do not want lookup in this machine
                 # so, we try to avoid sending data to the Server 
                 # which is running in this host
