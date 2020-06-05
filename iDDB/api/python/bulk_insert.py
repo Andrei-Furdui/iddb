@@ -194,7 +194,8 @@ def read_csv_file(start_line, stop_lines, table_name):
     
     counter = 0
 
-    print ("The insert operation was started. Remote insert will be done in background...")
+    print ("The insert operation has been started. Remote insert will be done in background")
+    print ("Our advice (not mandatory!) is to wait a few minutes before doing any further operation with specified table...")
 
     # this flag handles the daemon script responsible for 
     # doing the bulk insert remote...

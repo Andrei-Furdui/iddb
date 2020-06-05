@@ -97,9 +97,9 @@ CACHE_CSV_PATH = helper_obj.get_home_path() + "var/iDDB/" + sys.argv[3]
 DATABASE_NAME = sys.argv[1]
 TABLE_NAME = sys.argv[2]
 
-# we'll wait between iterations 3 sec, in this way we make
+# we'll wait between iterations 1 sec, in this way we make
 # sure that the remotes can handle this request
-WAIT_BEFORE_CACHE_ITERATION = 3
+WAIT_BEFORE_CACHE_ITERATION = 1
 
 def remove_cached_csv(csv_file):
     command = os.popen("rm -rf " + csv_file)
@@ -128,7 +128,9 @@ def handle_csv_file():
                 cache_content.append(final_message)
                 bulk_string_protocol = ""
             else:
+                # do nothing otherwise
                 continue
+
         protocol_header = "insert_tb_bulk#$"
         final_message = protocol_header + bulk_string_protocol
         cache_content.append(final_message)
@@ -136,7 +138,7 @@ def handle_csv_file():
         for c in range(0, len(cache_content)):
             cache_content += "\n"
             send_to_server(cache_content[c])
-            time.sleep(WAIT_BEFORE_CACHE_ITERATION/2)
+            time.sleep(WAIT_BEFORE_CACHE_ITERATION)
 
     remove_cached_csv(CACHE_CSV_PATH)
 
