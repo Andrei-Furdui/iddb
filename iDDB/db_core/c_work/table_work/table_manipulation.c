@@ -390,6 +390,19 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 			}
 			break;
 
+		case 3:
+			while((read = getline(&each_line, &length, fd_table)) != -1){
+				if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
+					counter++;
+					continue;
+				}
+				each_line[strcspn(each_line, "\n")] = 0;
+				if (counter >= 2) {
+					number_of_lines++;
+				}
+			
+			}
+			
 		default:
 			strcpy(log_info, "An user trying to select number of lines from ");
 			strcat(log_info, table_name);

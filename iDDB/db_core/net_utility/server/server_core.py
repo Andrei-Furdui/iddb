@@ -258,12 +258,12 @@ class ServerWorker:
                             else:
                                 c.send(self.OK_MSG)
 
-                        
                         elif "select_tb" in identifier:
+                            body_parts = body.split("!")
                             so_file = '../out/so_files/table_manipulation.so'
-                            #c_db = CDLL(so_file)
-                            #c_return = c_db.select_all_from_table(str(body_parts[0]), str(body_parts[1]), 2, 1)
-                        
+                            c_db = CDLL(so_file)
+                            c_return = c_db.select_all_from_table(str(body_parts[0]), str(body_parts[1]), 3, 1)
+
                         else:
                             c.send(self.NOK_MSG)
                 
