@@ -660,9 +660,15 @@ class UserPrompt:
 					utility_str = db_name + "!" + s_asterix_table
 					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
 					for i in range(0, len(server_result)):
-						if int(server_result[i]) != int(c_return):
+						try:
+							if int(server_result[i]) != int(c_return):
+								logger = PythonLogger("ERROR")
+								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								return
+						except: 
 							logger = PythonLogger("ERROR")
-							logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
 							print ("Select operation has failed. Check log file for details. Status (-1).")	
 							return
 					# end of socket part	
@@ -686,9 +692,15 @@ class UserPrompt:
 					utility_str = db_name + "!" + s_asterix_table
 					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
 					for i in range(0, len(server_result)):
-						if int(server_result[i]) != int(c_return):
+						try:
+							if int(server_result[i]) != int(c_return):
+								logger = PythonLogger("ERROR")
+								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								return
+						except: 
 							logger = PythonLogger("ERROR")
-							logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
 							print ("Select operation has failed. Check log file for details. Status (-1).")	
 							return
 					# end of socket part
