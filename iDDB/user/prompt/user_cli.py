@@ -620,7 +620,6 @@ class UserPrompt:
 						logger.write_log("An user's trying to insert data but fails because one of remote servers returns an error, please investigate!")
 						print ("Insert operation has failed. Check log file for details. Status (-1).")	
 						return
-				
 				# end of socket part
 
 				c_return = c_db.do_insert_db(str(db_utility.get_current_database()), 
@@ -640,7 +639,7 @@ class UserPrompt:
 					logger.write_log("An user's trying to do a select but fails because the FROM keyword is missing...")
 					print("Select operation has failed due to a syntax error. Check log file for details. Status (-1).")
 					return
-
+			
 				# unfortunately we treat each hardcoded case one by one
 				# in this way, the complexity is increased but for now
 				# let's do that in this way...
@@ -652,11 +651,25 @@ class UserPrompt:
 						print ("Specified table doesn't exist. Status (-1).")
 						return
 
-					db_name = db_utility.get_current_database()
-					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 1)
+					db_name = db_utility.get_current_database()	
+
+					# socket part
+					client_socket = ClientWorker()
+					utility_str = db_name + "!" + s_asterix_table
+					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
+					for i in range(0, len(server_result)):
+						if "NOK" in server_result[i]:
+							logger = PythonLogger("ERROR")
+							logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+							print ("Select operation has failed. Check log file for details. Status (-1).")	
+							return
+					# end of socket part	
+
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 1, 0)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
+
 				
 				#2 TREAT CASE SELECT COUNT(*) FROM ...
 				elif "select count(*) from " in actual_user_command.lower():
@@ -665,7 +678,7 @@ class UserPrompt:
 						print ("Specified table doesn't exist. Status (-1).")
 						return
 					db_name = db_utility.get_current_database()
-					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 2)
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 2, 0)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return

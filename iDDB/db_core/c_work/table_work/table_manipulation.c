@@ -288,7 +288,12 @@ int do_insert_db(char *db_name, char *table_name, char *content){
 
 // This methods performs a select * from ...
 // Returns TRUE is everything is ok or FALSE otherwise
-int select_all_from_table (char *db_name, char *table_name, int select_count_asterix) {
+// Parameters:
+// 1: select_count_asterix - if 1, then displays the output of this table, if 2 then 
+// displays the number of lines (count(*)) from this table
+// 2: return_all: if 0, then perform the above and return TRUE or FALSE, based on how 
+// the operation is executed, otherwise, returns the number of lines of this table
+int select_all_from_table (char *db_name, char *table_name, int select_count_asterix, int return_all) {
 	// make sure the database name and table name is fine
 	if (!check_null_argument(db_name) || !check_null_argument(table_name)) {
 		return FALSE;
@@ -403,8 +408,6 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 			free (local_table_name);
 			return FALSE;
 	}
-	
-	
 
 	fclose(fd_table);
 	if (each_line) {
@@ -416,10 +419,8 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 	free (log_info);
 	free (database_path);
 	free (local_table_name);
-	return TRUE;
+	if(!return_all)
+		return TRUE;
+	else
+		return number_of_lines;
 }
-
-/*
-void main() {
-	printf("RESULT: %d\n", create_empty_table("test", "exemplu12345.bat", "column1_name-type,column2_name-type,column3_name-type,"));
-}*/

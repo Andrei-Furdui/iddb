@@ -61,6 +61,7 @@ class ServerWorker:
         (in this case, the body must have the following format:
         db_name!table_name!data)
         6. truncate_tb => remove all data from table
+        7. select_tb => select all or selective from table
 
         For all identifiers above, the Server will create a new thread (if possible, if not,
         all work will be done in the Server thread) which is
@@ -243,7 +244,6 @@ class ServerWorker:
                                 table_path = helper_obj.get_home_path() + "var/iDDB/database/" + db_name + "/" + table_name + ".iddb"
                                 tb_utility.do_insert(table_path, final_content_on_bulk_insert[:-1])
                                 
-                            
                         elif "truncate_tb" in identifier:
                             # FIXME - when enabling the failing import
                             # enable also the following line (this is the correct way
@@ -257,6 +257,13 @@ class ServerWorker:
                                 c.send(self.NOK_MSG)
                             else:
                                 c.send(self.OK_MSG)
+
+                        
+                        elif "select_tb" in identifier:
+                            so_file = '../out/so_files/table_manipulation.so'
+                            #c_db = CDLL(so_file)
+                            #c_return = c_db.select_all_from_table(str(body_parts[0]), str(body_parts[1]), 2, 1)
+                        
                         else:
                             c.send(self.NOK_MSG)
                 
