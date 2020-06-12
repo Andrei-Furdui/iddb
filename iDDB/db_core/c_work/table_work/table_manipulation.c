@@ -391,6 +391,7 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 			break;
 
 		case 3:
+			strcpy(log_info, "This is a remote select,");
 			while((read = getline(&each_line, &length, fd_table)) != -1){
 				if (!strcmp(each_line, TABLE_PROPERTIES_COMMENT)) {
 					counter++;
