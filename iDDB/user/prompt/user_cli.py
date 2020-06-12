@@ -680,6 +680,19 @@ class UserPrompt:
 						print ("Specified table doesn't exist. Status (-1).")
 						return
 					db_name = db_utility.get_current_database()
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 3, 1)
+					# socket part
+					client_socket = ClientWorker()
+					utility_str = db_name + "!" + s_asterix_table
+					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
+					for i in range(0, len(server_result)):
+						if int(server_result[i]) != int(c_return):
+							logger = PythonLogger("ERROR")
+							logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+							print ("Select operation has failed. Check log file for details. Status (-1).")	
+							return
+					# end of socket part
+					
 					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 2, 0)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
@@ -721,6 +734,25 @@ class UserPrompt:
 					full_table_path = db_name + table_name1 + ".iddb"
 					all_columns_from_table = tb_utility.get_only_columns_name_from_table(full_table_path)
 					
+					c_return = c_db.select_all_from_table(str(db_utility.get_current_database()), str(table_name1), 3, 1)
+					# socket part
+					client_socket = ClientWorker()
+					utility_str = db_utility.get_current_database() + "!" + table_name1
+					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
+					for i in range(0, len(server_result)):
+						try:
+							if int(server_result[i]) != int(c_return):
+								logger = PythonLogger("ERROR")
+								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								return
+						except:
+							logger = PythonLogger("ERROR")
+							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
+							print ("Select operation has failed. Check log file for details. Status (-1).")	
+							return
+					# end of socket part
+
 					if len(list_columns) > len(all_columns_from_table):
 						print("Select operation has failed since more than needed columns were specified. Status (-1).")
 						return
