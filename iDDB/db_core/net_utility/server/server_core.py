@@ -263,6 +263,7 @@ class ServerWorker:
                             so_file = '../out/so_files/table_manipulation.so'
                             c_db = CDLL(so_file)
                             c_return = c_db.select_all_from_table(str(body_parts[0]), str(body_parts[1]), 3, 1)
+                            c.send(c_return)
 
                         else:
                             c.send(self.NOK_MSG)

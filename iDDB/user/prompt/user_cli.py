@@ -653,12 +653,15 @@ class UserPrompt:
 
 					db_name = db_utility.get_current_database()	
 
+					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 3, 1)
+
 					# socket part
 					client_socket = ClientWorker()
 					utility_str = db_name + "!" + s_asterix_table
 					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
 					for i in range(0, len(server_result)):
-						if "NOK" in server_result[i]:
+						if int(server_result[i]) != int(c_return):
+						#if "NOK" in server_result[i]:
 							logger = PythonLogger("ERROR")
 							logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
 							print ("Select operation has failed. Check log file for details. Status (-1).")	

@@ -400,9 +400,9 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 				if (counter >= 2) {
 					number_of_lines++;
 				}
-			
 			}
-			
+			break;
+
 		default:
 			strcpy(log_info, "An user trying to select number of lines from ");
 			strcat(log_info, table_name);
