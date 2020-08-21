@@ -98,14 +98,6 @@ class ClientWorker:
                 ip_addr = self.get_local_ip()
                 logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " is unable to connect to " + all_ips[i])
 
-    """
-    @deprecated
-    def test(self):
-        dummy_socket = socket.socket()
-        dummy_socket.connect(("192.168.1.7", self.PORT))
-        dummy_socket.close()
-    """
-
     def send_to_server(self, message):
 
         if len(message) <=0 or message is None:
@@ -116,29 +108,30 @@ class ClientWorker:
         all_ips = self.get_server_ip_address()
         local_ip_addr = self.get_local_ip()
         server_result = []
-        for i in range(0, len(all_ips)):
-            try:
-                self._client_socket = socket.socket()
-                self._client_socket.settimeout(self.socket_timeout)
-                # we do not want lookup in this machine
-                # so, we try to avoid sending data to the Server 
-                # which is running in this host
-                if local_ip_addr in all_ips[i]:
-                    continue
-                
-                self._client_socket.connect((all_ips[i], self.PORT))
-                self._client_socket.send(message.encode())
-                data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
-                server_result.append(data)
-                self._client_socket.close()
-            
-            # socket exception (e.g. connection failed)
-            except:
-                server_result.append("NOK")
-        
+
+        if len(all_ips[0]) > 0:
+            for i in range(0, len(all_ips)):
+                try:
+                    self._client_socket = socket.socket()
+                    self._client_socket.settimeout(self.socket_timeout)
+                    # we do not want lookup in this machine
+                    # so, we try to avoid sending data to the Server 
+                    # which is running in this host
+                    if local_ip_addr in all_ips[i]:
+                        continue
+                    
+                    self._client_socket.connect((all_ips[i], self.PORT))
+                    self._client_socket.send(message.encode())
+                    data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
+                    server_result.append(data)
+                    self._client_socket.close()
+                    
+                # socket exception (e.g. connection failed)
+                except:
+                    server_result.append("NOK")
+        else:
+            # there's a case where we can have only one iddb node so we should just send a dummy "OK"
+            # response meaning that the current node can do a lookup for its IP - even it's not "very" legal
+            server_result.append("OK")
+
         return server_result
-'''
-c = ClientWorker()
-c.get_server_ip_address()
-print (c.test_connection())
-'''

@@ -32,7 +32,7 @@ class TableUtility:
 			return None
 
 	def get_table_name(self):
-		"""Returns the real table name from the gived
+		"""Returns the real table name from the given
 		constructor parameter"""
 		end_of_table_name = "("
 		end_of_table_name_space = " "
