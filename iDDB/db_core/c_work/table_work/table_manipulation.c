@@ -438,3 +438,4 @@ int select_all_from_table (char *db_name, char *table_name, int select_count_ast
 	else
 		return number_of_lines;
 }
+
