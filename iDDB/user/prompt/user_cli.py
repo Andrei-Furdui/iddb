@@ -142,7 +142,9 @@ class UserPrompt:
 			# continue with the SELECT command
 			pass 
 
-		
+		# call the C driver for debugging enabling/disabling
+		so_debug_file = '../../out/so_files/log_reader.so'
+		c_db_debug = CDLL(so_debug_file)
 
 		# this variable represents the current database - the one which
 		# the user wants to do his job
@@ -258,8 +260,9 @@ class UserPrompt:
 						return
 
 					db_utility.save_current_database(str(current_database))
-					logger = PythonLogger("DEBUG")
-					logger.write_log("Current database is: " + str(current_database) + " ...")
+					if c_db_debug.is_debug() == 1:
+						logger = PythonLogger("DEBUG")
+						logger.write_log("Current database is: " + str(current_database) + " ...")
 
 		# let's handle table commands here
 
@@ -368,8 +371,9 @@ class UserPrompt:
 					return
 
 			if "INSERT INTO".lower() in actual_user_command.lower():
-				logger = PythonLogger("DEBUG")
-				logger.write_log("Preparing preconditions for the insert operation...")
+				if c_db_debug.is_debug() == 1:
+					logger = PythonLogger("DEBUG")
+					logger.write_log("Preparing preconditions for the insert operation...")
 
 				if db_utility.get_current_database() is None:
 					print ("You must specify a database which contains the table to insert data into. Status (-1).")
@@ -587,8 +591,9 @@ class UserPrompt:
 				
 				# end of precondition 3
 				################################
-				logger = PythonLogger("DEBUG")
-				logger.write_log("Done with preconditions for the insert operation...")
+				if c_db_debug.is_debug() == 1:
+					logger = PythonLogger("DEBUG")
+					logger.write_log("Done with preconditions for the insert operation...")
 				
 				# now, since we worked out all preconditions, it's time to pass this string
 				# to the C driver
@@ -713,8 +718,9 @@ class UserPrompt:
 				#3 TREAT CASE SELECT ... FROM ... WHERE...
 				#3.1 select column from table
 				elif "select " in actual_user_command and "from " in actual_user_command:
-					logger = PythonLogger("DEBUG")
-					logger.write_log("Selecting data with WHERE clause - start...")
+					if c_db_debug.is_debug() == 1:
+							logger = PythonLogger("DEBUG")
+							logger.write_log("Selecting data with WHERE clause - start...")
 					columns_select = self.find_between(actual_user_command, "select ", " from")
 
 					if (columns_select is None) or "from" in columns_select:
@@ -873,8 +879,9 @@ class UserPrompt:
 							sys.exit(-1)
 						print("")
 					
-					logger = PythonLogger("DEBUG")
-					logger.write_log("Selecting data with WHERE clause - done...")
+					if c_db_debug.is_debug() == 1:
+						logger = PythonLogger("DEBUG")
+						logger.write_log("Selecting data with WHERE clause - done...")
 						
 
 			if "TRUNCATE ".lower() in actual_user_command.lower():

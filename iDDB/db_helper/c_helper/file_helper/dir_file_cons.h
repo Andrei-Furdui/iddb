@@ -19,6 +19,11 @@
 #define DEBUG "DEBUG"
 #define WARN "WARN" //(a.k.a WARNING)
 #define ERROR "ERROR"
+#define DEBUG_YES 1
+#define DEBUG_NO 0 
+// we can have only following values:
+//DEBUG=TRUE or DEBUG=FALSE so 16 is more than enough
+#define DEBUG_ARRAY_LENGTH 16
 
 // the path starting from the $HOME dir
 #define DB_PATH "var/iDDB/database/"

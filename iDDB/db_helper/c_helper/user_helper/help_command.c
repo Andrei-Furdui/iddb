@@ -3,8 +3,9 @@
 #include <string.h>
 #include "../file_helper/dir_file_cons.h"
 #include "../../../logger/c_logger/c_logger.c"
+#include "../../common/log_reader.c"
 
-// This method prints the output for the help commands
+// This method prints the output for the help command
 // inserted by the client
 void help_command() {
   char *final_message = (char *) malloc (sizeof(char *) * MAX_STREAM_LENGTH/50);
@@ -55,7 +56,11 @@ void help_command() {
   strcat(final_message, help);
 
   printf ("%s\n", final_message);
-  write_log(DEBUG, "Displaying the help section...");
+
+  if(is_debug()) {
+    write_log(DEBUG, "Displaying the help section...");
+  }
 
   free (final_message);
+
 }

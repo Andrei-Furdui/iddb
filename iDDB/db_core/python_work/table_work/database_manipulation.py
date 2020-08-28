@@ -1,6 +1,7 @@
 import os
 import base64
 import sys
+from ctypes import *
 
 sys.path.insert(0, "../../../logger/python_logger/")
 from python_logger import PythonLogger
@@ -18,6 +19,9 @@ class DatabaseUtility:
 		self.helper_obj = DirFileHelper()
 		self.database_path = self.helper_obj.get_home_path() + "var/iDDB/database"
 		self.current_database_file = self.helper_obj.get_home_path() + "var/iDDB/current_database.idbb"
+
+		self.so_file = '../../out/so_files/log_reader.so'
+		self.c_db = CDLL(self.so_file)
 
 	def get_all_databases(self):
 		"""Returns all existing databases"""
@@ -60,9 +64,12 @@ class DatabaseUtility:
 
 	def remove_database_file_content(self):
 		if os.path.exists(self.current_database_file):
-  			os.remove(self.current_database_file)
-			logger = PythonLogger("DEBUG")
-			logger.write_log("Current/existing database reference was removed...")
+  		    os.remove(self.current_database_file)
+
+		    c_return = self.c_db.is_debug()
+                    if c_return == 1:
+		        logger = PythonLogger("DEBUG")
+		        logger.write_log("Current/existing database reference was removed...")
 
 
 

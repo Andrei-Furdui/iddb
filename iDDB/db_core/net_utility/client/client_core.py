@@ -1,6 +1,7 @@
 import socket
 import sys
 import time
+from ctypes import *
 from threading import Thread
 
 sys.path.insert(0, "../../../db_helper/python_helper/file_helper/")
@@ -35,6 +36,10 @@ class ClientWorker:
 
         # maximum buffer that server can send to this client
         self.MAX_RECV_BUFFER = 8192
+
+        # reference to the C debug library
+        self.so_debug_file = '../../out/so_files/log_reader.so'
+	self.c_db_debug = CDLL(self.so_debug_file)
 
     def get_server_ip_address(self):
         all_ip = []
@@ -90,9 +95,10 @@ class ClientWorker:
                 dummy_socket.settimeout(self.socket_timeout)
                 dummy_socket.connect((all_ips[i], self.PORT))
                 dummy_socket.close()
-                logger = PythonLogger("DEBUG")
-                ip_addr = self.get_local_ip()
-                logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " successfully connected to " + all_ips[i])
+                if self.c_db_debug.is_debug() == 1:
+                    logger = PythonLogger("DEBUG")
+                    ip_addr = self.get_local_ip()
+                    logger.write_log(self.protocol_name + " - test_connection(): This node: " + ip_addr + " successfully connected to " + all_ips[i])
             except:
                 logger = PythonLogger("ERROR")
                 ip_addr = self.get_local_ip()

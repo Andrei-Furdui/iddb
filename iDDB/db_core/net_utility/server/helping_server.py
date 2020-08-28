@@ -1,4 +1,5 @@
 import sys
+from ctypes import *
 
 sys.path.insert(0, "../../../db_helper/python_helper/file_helper/")
 from dir_file_helper import DirFileHelper
@@ -46,8 +47,13 @@ class HelpingServer:
 			return 0
 	
 	def do_insert(self, table, content):
-		logger = PythonLogger("DEBUG")
-		result_message = "Received BulkInsert, result: "
+		so_debug_file = '../../../out/so_files/log_reader.so'
+		c_db_debug = CDLL(so_debug_file)
+
+		if c_db_debug.is_debug() == 1:
+			logger = PythonLogger("DEBUG")
+			result_message = "Received BulkInsert, result: "
+
 		try:
 			f = open(table, "a")
 

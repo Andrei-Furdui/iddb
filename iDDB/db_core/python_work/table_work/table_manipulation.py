@@ -1,6 +1,7 @@
 import sys
 import traceback
 import os
+from ctypes import *
 
 sys.path.insert(0, "../../../logger/python_logger/")
 from python_logger import PythonLogger
@@ -14,6 +15,11 @@ class TableUtility:
 		# this should have the following format
 		# example(c1-int, c2-string)
 		self.full_table_command = full_table_command
+
+		# reference to the C debug library
+                self.so_debug_file = '../../out/so_files/log_reader.so'
+	        self.c_db_debug = CDLL(self.so_debug_file)
+
 		try:
 			if len(self.full_table_command) == 0 :
 				logger = PythonLogger("ERROR")
@@ -256,8 +262,9 @@ class TableUtility:
 			
 			final_message += temp_message + ")\n"
 
-			logger = PythonLogger("DEBUG")
-			logger.write_log("Describing table: " + real_table_name + " ...")
+			if self.c_db_debug.is_debug() == 1:
+				logger = PythonLogger("DEBUG")
+				logger.write_log("Describing table: " + real_table_name + " ...")
 			print final_message
 			
 			return 0

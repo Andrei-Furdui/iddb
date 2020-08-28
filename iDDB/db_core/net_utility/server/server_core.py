@@ -47,6 +47,10 @@ class ServerWorker:
         # maximum buffer that client can send to this server
         self.MAX_RECV_BUFFER = 8192
 
+        # reference to the C debug library
+        self.so_debug_file = '../../out/so_files/log_reader.so'
+	self.c_db_debug = CDLL(self.so_debug_file)
+
         """
         TalkTalkProtocol has the following header:
         <identifier>|[identifier|identifier|...]#$body
@@ -269,8 +273,10 @@ class ServerWorker:
                         else:
                             c.send(self.NOK_MSG)
                 
-                logger = PythonLogger("DEBUG")
-                logger.write_log(self.protocol_name + "Got connection from " + str(addr))
+                if self.c_db_debug.is_debug() == 1:
+                    logger = PythonLogger("DEBUG")
+                    logger.write_log(self.protocol_name + "Got connection from " + str(addr))
+
                 c.close()
                 
         else:

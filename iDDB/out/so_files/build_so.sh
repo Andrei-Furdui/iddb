@@ -11,5 +11,7 @@ sleep 1
 cc -fPIC -shared -o table_manipulation.so ../../db_core/c_work/table_work/table_manipulation.c #2>/dev/null
 sleep 1
 cc -fPIC -shared -o help_command.so ../../db_helper/c_helper/user_helper/help_command.c #2>/dev/null
+sleep 1
+cc -fPIC -shared -o log_reader.so ../../db_helper/common/log_reader.c #2>/dev/null
 
 echo "Compilation finished!"
