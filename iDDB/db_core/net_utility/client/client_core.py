@@ -55,8 +55,7 @@ class ClientWorker:
                     all_ip = temp_result.split(";")
                     break
         return all_ip
-                
-    
+
     def find_between(self, s, start, end):
 		"""Utility function used to extract the desired substring
 		from a given string. Needed, for example, to extract the table name"""
@@ -121,17 +120,17 @@ class ClientWorker:
                     self._client_socket = socket.socket()
                     self._client_socket.settimeout(self.socket_timeout)
                     # we do not want lookup in this machine
-                    # so, we try to avoid sending data to the Server 
+                    # so, we try to avoid sending data to the Server
                     # which is running in this host
                     if local_ip_addr in all_ips[i]:
                         continue
-                    
+
                     self._client_socket.connect((all_ips[i], self.PORT))
                     self._client_socket.send(message.encode())
                     data = self._client_socket.recv(self.MAX_RECV_BUFFER).decode()
                     server_result.append(data)
                     self._client_socket.close()
-                    
+
                 # socket exception (e.g. connection failed)
                 except:
                     server_result.append("NOK")

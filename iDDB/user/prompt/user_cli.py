@@ -125,7 +125,7 @@ class UserPrompt:
 				elif TABLE.lower() in user_command.lower():
 					table_command = True
 					break
-		
+
 		if "select" in user_command.lower():
 			select_command = True
 
@@ -140,7 +140,7 @@ class UserPrompt:
 				return
 		else:
 			# continue with the SELECT command
-			pass 
+			pass
 
 		# call the C driver for debugging enabling/disabling
 		so_debug_file = '../../out/so_files/log_reader.so'
@@ -215,7 +215,7 @@ class UserPrompt:
 				# socket part
 				client_socket = ClientWorker()
 				server_result = client_socket.send_to_server("remove_db#$" + str(db_name))
-				
+
 				for i in range(0, len(server_result)):
 					if "NOK" in server_result[i]:
 						logger = PythonLogger("ERROR")
@@ -311,7 +311,7 @@ class UserPrompt:
 							print ("Table creation has failed, check log file for details. Status (-1). ")
 							return
 					# end of socket part
-					
+
 					c_return = c_db.create_empty_table(str(current_database), str(tb_utility.get_table_name()), str(tb_utility.get_column_and_types() + ","))
 					if c_return != 1:
 						print ("Table creation has failed, check log file for details. Status (-1). ")
@@ -385,7 +385,7 @@ class UserPrompt:
 
 				python_helper = DirFileHelper()
 				db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
-				
+
 				# let's manipulate usefull info
 
 				###############################
@@ -419,10 +419,10 @@ class UserPrompt:
 						open_brackets += 1
 					elif c == ")":
 						closed_brackest += 1
-				
+
 				if open_brackets != 2 and closed_brackest != 2:
 					logger = PythonLogger("ERROR")
-					logger.write_log("An user's trying to insert data into '" + table_name + 
+					logger.write_log("An user's trying to insert data into '" + table_name +
 					"' but fails because didn't specify the required number of open/closed brackets...")
 					print ("Insert operation has failed due to a syntax error. Check log file for details. Status (-1).")
 					return
@@ -449,16 +449,16 @@ class UserPrompt:
 
 				# this contains all columns from the current table - it's a list
 				all_columns_from_table = tb_utility.get_only_columns_name_from_table(full_table_path)
-				
+
 				# test if the number of given columns is greater than the number of existing
 				# columns - if so, error
 				if len(columns_from_user) > len(all_columns_from_table):
 					print("Insert operation has failed since more than needed columns were specified. Status (-1).")
 					return
-				
+
 				# save what columns are used to insert data, the others are filled up with null value (probably)
-				# feature AI: THE USER CAN INSERT SOME COLUMNS WHICH DON'T EXIST, THEY ARE NOT TAKEN INTO 
-				# CONSIDERATION AT ALL  
+				# feature AI: THE USER CAN INSERT SOME COLUMNS WHICH DON'T EXIST, THEY ARE NOT TAKEN INTO
+				# CONSIDERATION AT ALL
 				final_columns = []
 				for i in range(0, len(columns_from_user)):
 					temp = columns_from_user[i]
@@ -468,7 +468,7 @@ class UserPrompt:
 							break
 
 				all_types_from_tabel = tb_utility.get_only_columns_types_from_table(full_table_path, final_columns)
-				
+
 				if len(final_columns) == 0 or len(all_types_from_tabel) == 0:
 					print ("Insert operation has failed since you must specify at least one valid column for inserting value. Status (-1).")
 					return
@@ -484,11 +484,11 @@ class UserPrompt:
 
 				if go_next is False:
 					logger = PythonLogger("ERROR")
-					logger.write_log("An user's trying to data into '" + table_name + 
+					logger.write_log("An user's trying to data into '" + table_name +
 					"' but fails because the VALUES keyword is missing...")
 					print ("Insert operation has failed due to a syntax error. Check log file for details. Status (-1).")
 					return
-				
+
 				counter = 0
 				index_second_open_bracket = 0
 				index_second_closed_bracket = 0
@@ -498,7 +498,7 @@ class UserPrompt:
 					if c == "(":
 						counter += 1
 					index_second_open_bracket += 1
-				
+
 				counter = 0
 				for c in utility_command:
 					if counter == 2:
@@ -506,7 +506,7 @@ class UserPrompt:
 					if c == ")":
 						counter += 1
 					index_second_closed_bracket += 1
-				
+
 				values = []
 				usefull_value = utility_command[index_second_open_bracket:index_second_closed_bracket - 1]
 				usefull_value += ","
@@ -519,15 +519,15 @@ class UserPrompt:
 					else:
 						values.append(aux)
 						aux = ""
-					
+
 				if len(final_columns) != len(values):
 					print ("You must specify the same number of columns and values to be inserted or you a syntax error. Status (-1).")
 					return
-				
+
 				# final columns specified by the user: final_columns
 				# final values specified by the user: values (they correspund with final_columns)
 
-				# contains all columns which will have the default values (e.g. all non-specified 
+				# contains all columns which will have the default values (e.g. all non-specified
 				# columns by the user)
 				non_inserted_columns = []
 				for i in range(0, len(all_columns_from_table)):
@@ -539,7 +539,7 @@ class UserPrompt:
 							break
 					if exists is False:
 						non_inserted_columns.append(temp_column)
-				
+
 				# let's check what will have the default value or not
 				error_message = "Insert operation has failed because one/more column(s) contains an invalid value. Status (-1)."
 				final_string = ""
@@ -563,7 +563,7 @@ class UserPrompt:
 									# TAKE ACTION!!!
 									# TODO
 									# FIXME
-									
+
 									#print("INTEGER VALIDATION: " + error_message)
 									#return
 							elif all_types_from_tabel[j] == "boolean":
@@ -588,20 +588,20 @@ class UserPrompt:
 					logger.write_log("The string to be inserted is NULL - we don't know the reason...")
 					print ("Unexpected error occurred. Check log file for details. Status (-1).")
 					return
-				
+
 				# end of precondition 3
 				################################
 				if c_db_debug.is_debug() == 1:
 					logger = PythonLogger("DEBUG")
 					logger.write_log("Done with preconditions for the insert operation...")
-				
+
 				# now, since we worked out all preconditions, it's time to pass this string
 				# to the C driver
 
 				if db_utility.get_current_database() is None:
 					print ("You must specify a database before inserting data. Status (-1).")
 					return
-				
+
 				final_content = final_string[:-1]
 				final_content = final_content.replace("| ", "|")
 				final_content = final_content.replace(" |", "|")
@@ -614,7 +614,7 @@ class UserPrompt:
 				#			print ("Insert operation has failed since multiple spaces were specified between values. Status (-1).")
 				#			return
 
-				
+
 				# socket part
 				client_socket = ClientWorker()
 				utility_str = db_utility.get_current_database() + "!" + table_name + "!" + final_content
@@ -623,11 +623,11 @@ class UserPrompt:
 					if "NOK" in server_result[i]:
 						logger = PythonLogger("ERROR")
 						logger.write_log("An user's trying to insert data but fails because one of remote servers returns an error, please investigate!")
-						print ("Insert operation has failed. Check log file for details. Status (-1).")	
+						print ("Insert operation has failed. Check log file for details. Status (-1).")
 						return
 				# end of socket part
 
-				c_return = c_db.do_insert_db(str(db_utility.get_current_database()), 
+				c_return = c_db.do_insert_db(str(db_utility.get_current_database()),
 													 	table_name, final_content)
 				if c_return != 1:
 					print ("Insert operation has failed. Check log file for details. Status (-1).")
@@ -638,13 +638,13 @@ class UserPrompt:
 				if db_utility.get_current_database() is None:
 					print ("You must specify a database which contains the table to select data from. Status (-1).")
 					return
-				
+
 				if "from" not in actual_user_command.lower():
 					logger = PythonLogger("ERROR")
 					logger.write_log("An user's trying to do a select but fails because the FROM keyword is missing...")
 					print("Select operation has failed due to a syntax error. Check log file for details. Status (-1).")
 					return
-			
+
 				# unfortunately we treat each hardcoded case one by one
 				# in this way, the complexity is increased but for now
 				# let's do that in this way...
@@ -656,7 +656,7 @@ class UserPrompt:
 						print ("Specified table doesn't exist. Status (-1).")
 						return
 
-					db_name = db_utility.get_current_database()	
+					db_name = db_utility.get_current_database()
 
 					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 3, 1)
 
@@ -669,21 +669,27 @@ class UserPrompt:
 							if int(server_result[i]) != int(c_return):
 								logger = PythonLogger("ERROR")
 								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
-								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								print ("Select operation has failed. Check log file for details. Status (-1).")
 								return
-						except: 
-							logger = PythonLogger("ERROR")
-							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
-							print ("Select operation has failed. Check log file for details. Status (-1).")	
-							return
-					# end of socket part	
+						except:
+							#######################################################################
+							# TODO - it might not work in the future - remove this if
+							# it is added because "OK" received when we have only one node running
+							# is not a number so an exception will occur
+							#######################################################################
+							if server_result[i] != "OK":
+								logger = PythonLogger("ERROR")
+								logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")
+								return
+					# end of socket part
 
 					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 1, 0)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
 
-				
+
 				#2 TREAT CASE SELECT COUNT(*) FROM ...
 				elif "select count(*) from " in actual_user_command.lower():
 					s_asterix_table = self.find_between(actual_user_command, "from ", " ")
@@ -692,29 +698,36 @@ class UserPrompt:
 						return
 					db_name = db_utility.get_current_database()
 					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 3, 1)
+
 					# socket part
 					client_socket = ClientWorker()
 					utility_str = db_name + "!" + s_asterix_table
 					server_result = client_socket.send_to_server("select_tb#$" + utility_str)
 					for i in range(0, len(server_result)):
 						try:
-							if int(server_result[i]) != int(c_return):
+							if int(server_result[i]) != int(c_return):# and server_result[i] != "OK":
 								logger = PythonLogger("ERROR")
-								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
-								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								logger.write_log("A1n user's trying to select data but fails because one of remote servers returns an error, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")
 								return
-						except: 
-							logger = PythonLogger("ERROR")
-							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
-							print ("Select operation has failed. Check log file for details. Status (-1).")	
-							return
+						except:
+							#######################################################################
+							# TODO - it might not work in the future - remove this if
+							# it is added because "OK" received when we have only one node running
+							# is not a number so an exception will occur
+							#######################################################################
+							if server_result[i] != "OK":
+								logger = PythonLogger("ERROR")
+								logger.write_log("An2 user's trying to select data but fails because of invalid data, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")
+								return
 					# end of socket part
-					
+
 					c_return = c_db.select_all_from_table(str(db_name), str(s_asterix_table), 2, 0)
 					if c_return != 1:
 						print ("Select operation has failed. Check log file for details. Status (-1).")
 						return
-				
+
 				#3 TREAT CASE SELECT ... FROM ... WHERE...
 				#3.1 select column from table
 				elif "select " in actual_user_command and "from " in actual_user_command:
@@ -726,7 +739,7 @@ class UserPrompt:
 					if (columns_select is None) or "from" in columns_select:
 						print ("You must provide at least one column to be selected. Status (-1).")
 						return
-					
+
 					table_name1 = self.find_between(actual_user_command, "from ", " ")
 					if table_name1 is None:
 						table_name1 = self.find_between(actual_user_command, "from ", ";")
@@ -751,7 +764,7 @@ class UserPrompt:
 					db_name = python_helper.get_home_path() + "var/iDDB/database/" + db_utility.get_current_database() + "/"
 					full_table_path = db_name + table_name1 + ".iddb"
 					all_columns_from_table = tb_utility.get_only_columns_name_from_table(full_table_path)
-					
+
 					c_return = c_db.select_all_from_table(str(db_utility.get_current_database()), str(table_name1), 3, 1)
 					# socket part
 					client_socket = ClientWorker()
@@ -762,19 +775,25 @@ class UserPrompt:
 							if int(server_result[i]) != int(c_return):
 								logger = PythonLogger("ERROR")
 								logger.write_log("An user's trying to select data but fails because one of remote servers returns an error, please investigate!")
-								print ("Select operation has failed. Check log file for details. Status (-1).")	
+								print ("Select operation has failed. Check log file for details. Status (-1).")
 								return
 						except:
-							logger = PythonLogger("ERROR")
-							logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
-							print ("Select operation has failed. Check log file for details. Status (-1).")	
-							return
+							#######################################################################
+							# TODO - it might not work in the future - remove this if
+							# it is added because "OK" received when we have only one node running
+							# is not a number so an exception will occur
+							#######################################################################
+							if server_result[i] != "OK":
+								logger = PythonLogger("ERROR")
+								logger.write_log("An user's trying to select data but fails because of invalid data, please investigate!")
+								print ("Select operation has failed. Check log file for details. Status (-1).")
+								return
 					# end of socket part
 
 					if len(list_columns) > len(all_columns_from_table):
 						print("Select operation has failed since more than needed columns were specified. Status (-1).")
 						return
-					
+
 					final_columns = []
 
 					# this contains index for each column
@@ -792,25 +811,25 @@ class UserPrompt:
 								final_columns_index.append(str(final_columns_index_byte))
 								break
 						final_columns_index_byte += 1
-					
+
 					if len(final_columns) <= 0:
 						print ("Select operation has failed since you must specify at least one valid column for selecting value. Status (-1).")
 						return
 
 					future_reference_columns = final_columns
 					where_condition1 = self.find_between(actual_user_command, "where ", " ")
-					
+
 					# it means we don't have where clause
 					if where_condition1 is None:
 						print("\nColumns selected:")
 						for i in range(0, len(final_columns)):
-							print(final_columns[i]), 
+							print(final_columns[i]),
 						print("\n\nResult:\n")
 						# let's select only that(these) column(s)
 						select_special1_thread = Thread(target = tb_utility.special_select1, \
 												args = (full_table_path, final_columns_index, ))
     				    		select_special1_thread.start()
-					
+
 						# if after 30 sec we get timeout, something is really wrong
 						select_special1_thread.join(timeout=30)
 						if select_special1_thread.isAlive():
@@ -822,30 +841,30 @@ class UserPrompt:
 						# "@" is a special delimiter
 						actual_user_command += "@"
 						real_where = self.find_between(actual_user_command, "where ", "@")
-						
+
 						conditions = real_where.split(" and ")
 						real_conditions = []
 						for i in range(0, len(conditions)):
 							conditions[i] = conditions[i].replace(" ", "")
-							real_conditions.append(conditions[i])	
+							real_conditions.append(conditions[i])
 
 
 						final_columns = []
 						final_conditions = []
 
 						# let's validate conditions
-						# here we're checking if the left operand 
+						# here we're checking if the left operand
 						# is an existing column
 						# e.g. column = condition (left operant = column)
 						for i in range(0, len(real_conditions)):
 							aux = real_conditions[i].split("=")
-							
+
 							for j in range(0, len(aux)/2):
 								final_columns.append(aux[j])
-							
+
 							for j in range(len(aux)/2, len(aux)):
 								final_conditions.append(aux[j])
-						
+
 						final_columns_validated = []
 						final_columns_validated_index = []
 						final_columns_validated_index_counter = 0
@@ -857,32 +876,32 @@ class UserPrompt:
 									final_columns_validated_index.append(final_columns_validated_index_counter)
 									break
 							final_columns_validated_index_counter += 1
-						
+
 						if len(final_columns_validated) <= 0:
 							print("You must specify at least one valid column to display data for. Status (-1).")
 							return
 
 						print("\nColumns selected:")
 						for i in range(0, len(future_reference_columns)):
-							print(future_reference_columns[i]), 
+							print(future_reference_columns[i]),
 						print("\n\nResult:\n")
 
 						select_special2_thread = Thread(target = tb_utility.special_select2, \
 												args = (full_table_path, final_columns_validated_index, \
 												final_conditions, final_columns_index, ))
     				    		select_special2_thread.start()
-						
+
 						# if after 30 sec we get timeout, something is really wrong
 						select_special2_thread.join(timeout=30)
 						if select_special2_thread.isAlive():
 							print ("\nSomething was wrong - core fault")
 							sys.exit(-1)
 						print("")
-					
+
 					if c_db_debug.is_debug() == 1:
 						logger = PythonLogger("DEBUG")
 						logger.write_log("Selecting data with WHERE clause - done...")
-						
+
 
 			if "TRUNCATE ".lower() in actual_user_command.lower():
 				if db_utility.get_current_database() is None:
@@ -916,7 +935,7 @@ class UserPrompt:
 				if tb_utility.delete_from_table(table_path) == 0:
 					print ("Removing operation has failed. Check log file for details. Status(-1).")
 					return
-							
+
 		print ("Command successfully executed. Status (0).\n")
 
 	def find_between(self, s, start, end):
