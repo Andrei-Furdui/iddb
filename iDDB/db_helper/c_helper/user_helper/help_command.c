@@ -1,13 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "../file_helper/dir_file_cons.h"
 #include "../../../logger/c_logger/c_logger.c"
 #include "../../common/log_reader.c"
 
+void *how_use_command (void *my_command) {
+  char *actual_command = (char *)my_command;
+  
+  char *final_message = (char *) malloc (sizeof(char *) * MIN_STREAM_LENGTH);
+
+  // the pattern is the same for all commands
+  strcpy(final_message, HELP_COMMAND_FIRST_PART);
+  strcat(final_message, "'");
+  strcat(final_message, actual_command);
+  strcat(final_message, "'");
+  strcat(final_message, "\n");
+
+  // check what we want to display
+  // based on the given command
+  if (!strcmp(actual_command, LS_DATABASE)) {
+    strcat(final_message, "--- Type 'ls database' OR 'ls databases'");
+  }
+  strcat(final_message, HELP_COMMAND_LAST_PART);
+
+  // displaying the actual message
+  printf("%s\n", final_message);
+
+  if(final_message) {
+    free(final_message);
+  }
+  return NULL;
+}
+
+// Implements the "EXAMPLE [command]" creating a new C thread with the output
+void call_example_command_from_thread (char *command) {
+  pthread_t how_to_thread;
+  pthread_create(&how_to_thread, NULL, how_use_command, command);
+  sleep (TIMEOUT_DISPLAYING_EXAMPLE_COMMAND);
+  //pthread_exit(how_use_command);
+}
+
 // This method prints the output for the help command
 // inserted by the client
-void help_command() {
+void help_command () {
   char *final_message = (char *) malloc (sizeof(char *) * MAX_STREAM_LENGTH/50);
 
   if (final_message == NULL) {

@@ -31,3 +31,13 @@
 #define TABLE_NAME "table_name:"
 #define COLUMN_NUMBER "column #"
 #define TABLE_PROPERTIES_COMMENT "###########################################\n"
+
+// tools for displaying the HELP command - all specific areas
+// TODO - each time whan iddb adds support for a new command, it must be added here
+// as well, in this way the user being able to get support for that command
+#define LS_DATABASE "ls database"
+#define MKDIR_DATABASE "mkdir database"
+
+#define HELP_COMMAND_FIRST_PART "\nDisplaying how-to-use the command: "
+#define HELP_COMMAND_LAST_PART " followed by ENTER\n"
+#define TIMEOUT_DISPLAYING_EXAMPLE_COMMAND 3

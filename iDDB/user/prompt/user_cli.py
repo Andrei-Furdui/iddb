@@ -104,9 +104,10 @@ class UserPrompt:
 
 		# let's check the command's purpose
 		# e.g. if it's a database command
-		# or a table one
+		# or a table one (or maybe a helping one)
 		database_command = False
 		table_command = False
+		example_command = False
 
 		# this is a special case - for select command
 		select_command = False
@@ -128,8 +129,11 @@ class UserPrompt:
 
 		if "select" in user_command.lower():
 			select_command = True
+		
+		if "example" in user_command.lower():
+			example_command = True
 
-		if select_command is False:
+		if select_command is False and example_command is False:
 			# we'll know if the command is correct or not (first requirment)
 			if database_command is False and table_command is False:
 				print ("Invalid command. Status (-1).\n")
@@ -935,6 +939,11 @@ class UserPrompt:
 				if tb_utility.delete_from_table(table_path) == 0:
 					print ("Removing operation has failed. Check log file for details. Status(-1).")
 					return
+
+		if example_command: 
+			so_file = '../../out/so_files/help_command.so'
+			c_db = CDLL(so_file)
+			c_db.call_example_command_from_thread("ls database")
 
 		print ("Command successfully executed. Status (0).\n")
 
