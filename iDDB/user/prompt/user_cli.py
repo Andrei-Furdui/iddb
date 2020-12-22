@@ -32,12 +32,18 @@ class UserPrompt:
 		self.running_prompt = True
 
 	def prompt_message(self):
-		# add info into system.log file
+		# add info into the system.log file
 		try:
 			logger = PythonLogger("INFO")
 			logger.write_log("An user is trying to connect to the database (CLI - entry point)...")
 		except IOError:
-			print ("Something's wrong with requirements. Exiting...")
+			print ("Sorry, something is wrong with requirements. Possible issues:\n\
+				1. Have you installed the database?\n\
+				2. Is your system a Linux distribution?\n\
+				3. Is the database configured properly?\n\
+				4. Does your system have enough permissions for all iddb's connections? (e.g. does the ~/var directory have correct permissions - can be accessed?)\n\
+				5. If none of above is true then please contact an administrator. Thank you!\n\
+				Exiting...")
 			sys.exit(-1)
 
 		# make sure no old database exists

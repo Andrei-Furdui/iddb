@@ -8,7 +8,6 @@ long get_free_ram() {
         return MAX_RAM;
     }
     
-
     int meminfo_file_length = 1024; //1024 is more than enough...
     short max_digits = 10; // (usually!) the primitive long type can store up to 10 digits
     long result = -1;
@@ -64,8 +63,10 @@ long get_free_ram() {
 }
 
 long allocate_ram_for_database() {
+    
     long total_ram = get_free_ram();
     long real_result = 0;
+    
     if (total_ram <= _512MB_RAM) {
         real_result = _512MB_RAM/2; 
     }
